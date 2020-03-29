@@ -2,9 +2,53 @@ Based on the values of the error counters, the CAN controller is set into the st
 The MCP2515 contains two error counters: the Receive Error Counter (REC) (see Register 6-2) and the Transmit Error Counter (TEC) (see Register 6-1). The values of both counters can be read by the MCU. These counters are incremented/decremented in accordance with the CAN bus specification. The MCP2515 is error-active if both error counters are below the error-passive limit of 128. It is error-passive if at least one of the error counters equals or exceeds 128.
 It goes to bus-off if the TEC exceeds the bus-off limit of 255. The device remains in this state until the bus-off recovery sequence is received. The bus-off recovery sequence consists of 128 occurrences of 11 consecutive recessive bits (see Figure 6-1).
 The MCP2515, after going bus-off, will recover back to error-active without any intervention by the MCU if the bus remains idle for 128 x 11 bit times. If this is not desired, the error Interrupt Service Routine (ISR) should address this.
-
 If transmission is initiated via the SPI interface, the TXREQ bit can be set at the same time as the TXPx priority bits. When TXREQ is set, the ABTF, MLOA and TXERR bits (TXBnCTRL[5:4]) will be cleared automatically.Setting the TXREQ bit (TXBnCTRL[3]) does not initiate a message transmission. It merely flags a message buffer as being ready for transmission. Transmission will start when the device detects that the bus is available.
 Once the transmission has completed successfully, the TXREQ bit will be cleared, the TXnIF bit (CANINTF) will be set and an interrupt will be generated if the TXnIE bit (CANINTE) is set. 
 If the message transmission fails, the TXREQ bit will remain set. This indicates that the message is still pending for transmission and one of the following condition flags will be set:
 • If the message started to transmit but encountered an error condition, the TXERR (TXBnCTRL[4]) and MERRF bits (CANINTF[7]) will be set, and an interrupt will be generated on the INT pin if the MERRE bit (CANINTE[7]) is set.
 • If the message is lost, arbitration at the MLOA bit (TXBnCTRL[5]) will be set.
+The HI-3110 transmit buffer consists of an eight message FIFO which allows transmission of up to eight messages. Messages are loaded to the transmit FIFO via SPI instruction. The
+next message to be transmitted (or current message trying to gain access to the bus) is loaded from the FIFO to the Transmit Buffer. This will happen automatically if TXEN or TX1M are set in CTRL1. If the bus is available, the message is sent. The Transmit History FIFO can optionally be used by the host to keep a record of up to eight successfully transmitted messages. The current transmission sequence can also be paused by resetting the TXEN bit in CTRL1 (or pulling TXEN pin low). In this case, the current message will be completed and any remaining messages in the transmit FIFO will not be transmitted.
+If the current message transmission goes ahead, two things can happen:
+a) The message is successful, and the transmit buffer is now ready to receive the next message from the transmit FIFO.
+The transmit history FIFO is updated (see below).
+b) The message is not successful due to lost arbitration or message error.
+Lost Arbitration: If arbitration is lost, the current message stays in the Transmit Buffer for re-transmission.
+Message error: Flag BUSERR is set in the Interrupt Flag Register. An error frame is sent and an optional hardware interrupt may also be generated at the INT pin if enabled in the Interrupt Enable Register (bit BUSERRIE = 1). If there is an error, the current message stays in the Transmit Buffer for automatic re-transmission in accordance with the CAN protocol.
+Conditions for entering the Power On Reset:
+• VBAT is below the VBAT_POD AND VCC is below VCC_UV threshold.
+Conditions for leaving the Power On Reset:
+• Once the power supply voltage VBAT OR VCC is within the functional range the transceiver enters Stand-by Mode within tPON.
+The internal Power On Reset flag will be set. After Power On Reset the TLE9252V enters Stand-by Mode.
+When TXBNCTRL.TXREQ is set, the TXBNCTRL.ABTF, TXBNCTRL.MLOA and TXBNCTRL.TXERR bits will be cleared.
+Setting the TXBNCTRL.TXREQ bit does not initiate amessage transmission, it merely flags a message buffer as ready for transmission. Transmission will start when the device detects that the bus is available. The device will then begin transmission of the highest priority message that is ready. When the transmission has completed successfully the
+TXBNCTRL.TXREQ bit will be cleared, the CANINTF.TXNIF bit will be set, and an interrupt will be generated if the CANINTE.TXNIE bit is set. If the message transmission fails, the TXBNCTRL.TXREQ will remain set indicating that the message is still pending for transmission and one of the following condition flags will be set. If the message
+started to transmit but encountered an error condition, the TXBNCTRL. TXERR and the CANINTF.MERRF bits will be set and an interrupt will be generated on the INT pin if the CANINTE.MERRE bit is set. If the message lost arbitration the TXBNCTRL.MLOA bit will be
+set.
+The MCU can request to abort a message in a specific message buffer by clearing the associated TXBnCTRL. TXREQ bit. Also, all pending messages can be requested to be aborted by setting the CANCTRL. ABAT bit. If the CANCTRL.ABAT bit is set to abort all pending messages, the user MUST reset this bit (typically after the user verifies that all TXREQ bits have been cleared) to continue trasmit messages. The CANCTRL.ABTF flag will only be set if the abort was requested via the CANCTRL.ABAT bit. Aborting a message by resetting the TXREQ bit does cause the ATBF bit to be set.
+Of the three Receive Buffers, the MAB is always committed to receiving the next message from the bus. The remaining two receive buffers are called RXB0 and RXB1 and can receive a complete message from the protocol engine.
+The MAB assembles all messages received. These messages will be transferred to the RXBN buffers (See Register 4-4 to Register 4-9) only if the acceptance filter criteria are met. When a message is moved into either of the receive buffers the appropriate CANINTF.RXNIF bit is set. This bit must be cleared by the MCU, when it has completed processing the message in the buffer, in order to allow a new message to be received into the buffer. If the CANINTE.RXNIE bit is set an interrupt will be generate on the INT pin to indicate that a valid message has been received. When a message is received, bits <3:0> of the RXBNCTRL Register will indicate the acceptance filter number that enabled reception, and whether the received message is a remote transfer request.
+if a message has an error before the end of frame, that portion of the message assembled in the MAB before the error frame will be loaded into the buffer. This mode has some value in
+debugging a CAN system and would not be used in an actual system environment.
+The MCP2542FD/4FD and MCP2542WFD/4WFD enter Unpowered mode under the following conditions:
+•After powering up the device, or
+•If VDD drops below VPORL, or
+•If VIO drops below VPORL_VIO.
+The MCP2542FD/4FD and MCP2542WFD/4WFD transitions from Unpowered mode to Wake mode when VDD and VIO are above their PORH levels. From Normal mode, the device will also enter Wake mode if VDD is smaller than VUVL, or if the band gap output voltage is not within valid range. Additionally, the device will transition from Standby mode to Wake mode if STBY is pulled Low.
+In Wake mode, the CAN bus is biased to ground and RXD is always high.
+When VDD exceeds VUVH, the band gap is within valid range and TXD is High, the device transitions into Normal mode.
+The device may be placed in Standby mode by applying a high level to the STBY pin. In Standby mode, the transmitter and the high-speed part of the receiver are switched off to minimize power consumption.
+The MCP2542WFD/4WFD wakes up from Standby/Silent mode when a dedicated wake-up pattern (WUP) is detected on the CAN bus. The wake-up pattern is specified in ISO 11898-6 and ISO11898-2:2016
+The MCP2557FD/8FD enters Unpowered mode if any
+of the following conditions occur:
+• After powering up the device
+• If VDD drops below VPORL
+• If VIO drops below VPORL_VIO
+The MCP2557FD/8FD transitions from Unpowered mode to Wake mode when VDD and VIO are above their PORH levels. From Normal mode, if VDD is smaller than VUVL, or if the bandgap output voltage is not within valid range, the device will also enter Wake mode.
+When VDD exceeds VUVH, the band gap is within valid range and TXD is High, the device transitions into Normal mode. To avoid driving the bus during a POR of the microcontroller, the transceiver proceeds to Normal mode only after TXD is high.
+The device may be placed in Silent mode by applying a high level to the ‘S’ pin (pin 8). In Silent mode, the transmitter is disabled and the CAN bus is biased to VDD/2. The high-speed differential receiver is active. The CAN controller must put the MCP2557FD/8FD
+back into Normal mode to enable the transmitter.
+Failsafe is the method the device uses to enter sleep mode from various other modes when specific issues arise. This feature uses the Sleep Wake Error (SWE) timer to determine if the node processor can communicate to the TCAN4550-Q1.
+Upon power up the SWE timer starts, tINACTIVE, the processor has typically four minutes to configure the TCAN4550-Q1, clear the PWRON flag or configure the device for normal mode.
+If the device has not had the PWRON flag cleared or been placed into normal mode, it
+enters sleep mode. The device wakes up if the CAN bus provides a WUP or a local wake event takes place, thus entering standby mode. Once in standby mode tSILENCE and tINACTIVE timers starts. If tINACTIVE expires, the device re-enters sleep mode.
