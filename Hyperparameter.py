@@ -1,0 +1,13 @@
+embed_size = 150
+hidden_size = 300
+num_layers = 1
+bin_size = 1
+num_epochs = 40
+prev_end=0
+batch_size = 100
+lr = 0.001
+vocab_size = 100
+weight_decay = 0.99
+use_saved = True # whether to train from a previous model
+continue_from = 35
+step = 0 # number of steps taken
