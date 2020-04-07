@@ -47,4 +47,4 @@ for data in dataset:
     input_ids = torch.tensor([tokenizer.encode(data, max_length=512)])
     all_hidden_states, all_attentions = model(input_ids)[-2:]
     print(all_hidden_states)
-    print(all_hidden_states.size())
+    print(len(all_hidden_states))
