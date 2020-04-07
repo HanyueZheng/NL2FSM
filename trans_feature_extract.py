@@ -38,12 +38,10 @@ model = model_class.from_pretrained(pretrained_weights,
                                         output_hidden_states=True,
                                         output_attentions=True)
 filename = "ie_out.txt"
+targetfile = "target.txt"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-dataloader = DataLoader(filename, device)
-dataset = dataloader.caseload()
-for i in dataset:
-    if i == "\n":
-        print("i")
+dataloader = DataLoader(filename, targetfile, device)
+dataset, targetset = dataloader.caseload()
 
 for data in dataset:
     input_ids = torch.tensor([tokenizer.encode(data, max_length=512)])
@@ -52,14 +50,14 @@ for data in dataset:
     print(all_hidden_states)
 
 
-    # Models are compatible with Torchscript
-    model = model_class.from_pretrained(pretrained_weights, torchscript=True)
-
-    #Simple serialization for models and tokenizers
-    model.save_pretrained('./save/')  # save
-    model = model_class.from_pretrained('./save/')  # re-load
-    tokenizer.save_pretrained('./save/')  # save
-    tokenizer = BertTokenizer.from_pretrained('./save/')  # re-load
+    # # Models are compatible with Torchscript
+    # model = model_class.from_pretrained(pretrained_weights, torchscript=True)
+    #
+    # #Simple serialization for models and tokenizers
+    # model.save_pretrained('./save/')  # save
+    # model = model_class.from_pretrained('./save/')  # re-load
+    # tokenizer.save_pretrained('./save/')  # save
+    # tokenizer = BertTokenizer.from_pretrained('./save/')  # re-load
 
 # import torch
 # from transformers import *
