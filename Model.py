@@ -148,9 +148,9 @@ class CopyDecoder(nn.Module):
 
 	def to_cuda(self, tensor):
 		# turns to cuda
-		if torch.cuda.is_available():
-			return tensor.cuda()
-		else:
+		# if torch.cuda.is_available():
+		# 	return tensor.cuda()
+		# else:
 			return tensor
 
 	def elapsed_time(self):
