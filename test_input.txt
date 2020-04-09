@@ -1,0 +1,14 @@
+The HI-3110 transmit buffer consists of an eight message <phrase>FIFO</phrase> which allows transmission of up to eight messages. Messages are loaded to the transmit <phrase>FIFO</phrase> via <phrase>SPI</phrase> instruction. The
+next message to be<phrase> transmitted</phrase> (or current message trying to gain access to the <phrase>bus</phrase>) is loaded from the <phrase>FIFO</phrase> to the Transmit Buffer.<phrase> This will happen automatically </phrase>if <phrase>TXEN</phrase> or TX1M are<phrase> set</phrase> in CTRL1. If <phrase>the <phrase>bus</phrase> is available, the message is sent</phrase>. The Transmit <phrase>History</phrase> <phrase>FIFO</phrase> can optionally be used by<phrase> the host to keep a record of up to eight successfully<phrase> transmitted</phrase> messages</phrase>. The current transmission <phrase>sequence</phrase> can also be paused by resetting the <phrase>TXEN</phrase> <phrase>bit</phrase> in CTRL1 (or pulling <phrase>TXEN</phrase> pin low).<phrase> In this case, the current message </phrase>will be completed and any remaining messages in the transmit <phrase>FIFO</phrase> will not be<phrase> transmitted</phrase>.
+If the current message transmission goes ahead, two things can happen:
+a) The message is successful, and the transmit buffer is now ready to receive the next message from the transmit <phrase>FIFO</phrase>.
+The transmit <phrase>history</phrase> <phrase>FIFO</phrase> is updated (see below).
+b) The message is not successful due to <phrase>lost</phrase> <phrase>arbitration</phrase> or message error.
+<phrase>Lost</phrase> <phrase>Arbitration</phrase>:<phrase> If <phrase><phrase>arbitration</phrase> is <phrase>lost</phrase>, the current message stays in the Transmit Buffer for re-transmission</phrase></phrase>.
+Message error: Flag <phrase>BUSERR</phrase> is<phrase> set</phrase> in the Interrupt Flag Register. An error frame is sent and an optional hardware interrupt may also <phrase>be generated</phrase> at the <phrase>INT</phrase> pin if enabled in the Interrupt Enable Register (<phrase>bit</phrase> <phrase>BUSERR</phrase>IE = 1). If there is an error, the current message stays in the Transmit Buffer for automatic re-transmission in accordance with the <phrase>CAN</phrase> protocol.
+
+Conditions for entering the Power On Reset:
+<phrase>• </phrase><phrase>VBAT</phrase> is below the <phrase>VBAT</phrase>_POD <phrase>AND</phrase> <phrase>VCC</phrase> is below <phrase>VCC</phrase>_UV threshold.
+Conditions for leaving the Power On Reset:
+<phrase>• </phrase>Once the power supply voltage <phrase>VBAT</phrase> <phrase>OR</phrase> <phrase>VCC</phrase> is within the functional <phrase>range</phrase> the transceiver enters Stand-by Mode within tPON.
+<phrase>The internal Power On Reset flag </phrase>will be<phrase> set</phrase>. After <phrase>Power On Reset the TLE9252V enters Stand-by Mode</phrase>.
