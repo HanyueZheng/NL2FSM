@@ -127,5 +127,5 @@ for epoch in range(param.num_epochs):
     start = time.time()
 
     if epoch % 100 == 0:
-        torch.save(f='models/encoder_%s_%s.pckl' % ("copynet", str(epoch)), obj=encoder)
-        torch.save(f='models/decoder_%s_%s.pckl' % ("copynet", str(epoch)), obj=decoder)
+        torch.save(f='model/encoder_%s_%s.pckl' % ("copynet", str(epoch)), obj=encoder)
+        torch.save(f='model/decoder_%s_%s.pckl' % ("copynet", str(epoch)), obj=decoder)
