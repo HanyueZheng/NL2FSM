@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pdb
 
 class Batch(object):
 	def __init__(self, file_list, max_in_len, max_out_len, max_oovs):
@@ -63,7 +64,11 @@ class Batch(object):
 		# for each sample in minibatch
 		for line in minibatch:
 			# split each line into a story and a summary (word lists)
-			story, summary = line.split(deliminator)
+			try:
+				story, summary = line.split(deliminator)
+			except Exception as e:
+				print(e)
+				pdb.set_trace()
 			story = vocab.tokenize(story)[:self.max_in_len]
 			summary = vocab.tokenize(summary)[:self.max_out_len-2]
 			summary = ['<SOS>']+summary+['<EOS>']

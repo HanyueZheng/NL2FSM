@@ -57,7 +57,11 @@ while(samples_read<len(test)):
 
     # 1.4.2. obtain batch outputs
     data = test[samples_read:min(samples_read+param.batch_size,len(test))]
-    inputs, outputs = batch.process_minibatch(data, vocab)
+    try:
+        inputs, outputs = batch.process_minibatch(data, vocab)
+    except Exception as e:
+        print(e)
+        pdb.set_trace()
     samples_read+=len(data)
 
     # 1.4.3. inputs and outputs must be unk-ed to put into model w/ limited vocab
