@@ -39,6 +39,10 @@ num_batches = int(num_samples/param.batch_size)
 
 encoder = CopyEncoder(vocab_size, param.embed_size, param.hidden_size)
 decoder = CopyDecoder(vocab_size, param.embed_size, param.hidden_size)
+if torch.cuda.is_available():
+    encoder.cuda()
+    decoder.cuda()
+    
 for epoch in range(param.num_epochs):
     print("==================================================")
     print("Epoch ",epoch+1)
