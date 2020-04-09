@@ -4,6 +4,24 @@ import torch
 import numpy as np
 from torch.autograd import Variable
 import torch.nn.functional as F
+from Layers import clones, LayerNorm
+import pdb
+
+class CopyEncoder(nn.Module):
+	def __init__(self, vocab_size, embed_size, hidden_size):
+		super(CopyEncoder, self).__init__()
+
+		self.embed = nn.Embedding(vocab_size, embed_size)
+
+		self.gru = nn.GRU(input_size=embed_size,
+			hidden_size=hidden_size, batch_first=True,
+			bidirectional=True)
+
+	def forward(self, x):
+		# input: [b x seq]
+		embedded = self.embed(x)
+		out, h = self.gru(embedded) # out: [b x seq x hid*2] (biRNN)
+		return out, h
 
 class CopyDecoder(nn.Module):
 	def __init__(self, vocab_size, embed_size, hidden_size):
@@ -14,6 +32,9 @@ class CopyDecoder(nn.Module):
 		self.embed = nn.Embedding(vocab_size, embed_size)
 		self.gru = nn.GRU(input_size=embed_size+hidden_size*2,
 			hidden_size=hidden_size, batch_first=True)
+
+		# self.layers = clones(layer, N)
+		# self.norm = LayerNorm(layer.size)
 
 		# weights
 		self.Ws = nn.Linear(hidden_size*2, hidden_size) # only used at initial stage
@@ -31,13 +52,19 @@ class CopyDecoder(nn.Module):
 		# hyperparameters
 		start = time.time()
 		b = encoded.size(0) # batch size
+		encoded.size()
 		seq = encoded.size(1) # input sequence length
 		vocab_size = self.vocab_size
 		hidden_size = self.hidden_size
 
 		# 0. set initial state s0 and initial attention (blank)
 		if order==0:
-			prev_state = self.Ws(encoded[:,-1])
+			encoded[:, -1].size()
+			try:
+				prev_state = self.Ws(encoded[:,-1])
+			except Exception as e:
+				print(e)
+				pdb.set_trace()
 			weighted = torch.Tensor(b,1,hidden_size*2).zero_()
 			weighted = self.to_cuda(weighted)
 			weighted = Variable(weighted)
@@ -45,9 +72,12 @@ class CopyDecoder(nn.Module):
 		prev_state = prev_state.unsqueeze(0) # [1 x b x hidden]
 
 		# 1. update states
-		gru_input = torch.cat([self.embed(input_idx).unsqueeze(1), weighted],2) # [b x 1 x (h*2+emb)]
+		gru_input = torch.cat([self.embed(input_idx).unsqueeze(1), weighted],2)  # [b x 1 x (h*2+emb)]
 		_, state = self.gru(gru_input, prev_state)
 		state = state.squeeze() # [b x h]
+		state.size()
+		# for layer in self.layers:
+		# 	x = layer(x, memory, src_mask, tgt_mask)
 
 		# 2. predict next word y_t
 		# 2-1) get scores score_g for generation- mode
@@ -67,6 +97,7 @@ class CopyDecoder(nn.Module):
 		probs = F.softmax(score)
 		prob_g = probs[:,:vocab_size] # [b x vocab]
 		prob_c = probs[:,vocab_size:] # [b x seq]
+
 		# remove scores which are obsolete
 
 		# 2-4) add prob_c to prob_g
@@ -92,15 +123,19 @@ class CopyDecoder(nn.Module):
 		# 3. get weighted attention to use for predicting next word
 		# 3-1) get tensor that shows whether each decoder input has previously appeared in the encoder
 		idx_from_input = []
-		for i,j in enumerate(encoded_idx):
-			idx_from_input.append([int(k==input_idx[i].data[0]) for k in j])
+		for i,element in enumerate(encoded_idx):
+			try:
+				idx_from_input.append([int(k==input_idx[i].item()) for k in element])
+			except Exception as e:
+				print(e)
+				pdb.set_trace()
 		idx_from_input = torch.Tensor(np.array(idx_from_input, dtype=float))
 		# idx_from_input : np.array of [b x seq]
-		idx_from_input = self.to_cuda(idx_from_input)
+		#idx_from_input = self.to_cuda(idx_from_input)
 		idx_from_input = Variable(idx_from_input)
 		for i in range(b):
-			if idx_from_input[i].sum().data[0]>1:
-				idx_from_input[i] = idx_from_input[i]/idx_from_input[i].sum().data[0]
+			if idx_from_input[i].sum().item()>1:
+				idx_from_input[i] = idx_from_input[i]/idx_from_input[i].sum().item()
 		# 3-2) multiply with prob_c to get final weighted representation
 		attn = prob_c * idx_from_input
 		# for i in range(b):
@@ -123,3 +158,4 @@ class CopyDecoder(nn.Module):
 		print("Time difference from prev. state: ",elapsed-self.time)
 		self.time = elapsed
 		return
+
