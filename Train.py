@@ -131,6 +131,6 @@ for epoch in range(param.num_epochs):
     print("Elapsed time for epoch: ",elapsed-start)
     start = time.time()
 
-    if epoch % 100 == 0:
+    if epoch % 10 == 0:
         torch.save(f='model/encoder_%s_%s.pckl' % ("copynet", str(epoch)), obj=encoder)
         torch.save(f='model/decoder_%s_%s.pckl' % ("copynet", str(epoch)), obj=decoder)
