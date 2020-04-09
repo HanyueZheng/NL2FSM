@@ -18,7 +18,8 @@ criterion = nn.NLLLoss()
 start = time.time()
 targetfile = "target.txt"
 inputfile = "ie_out.txt"
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = "cpu"
 dataloader = DataLoader(inputfile, targetfile, device)
 x, y = dataloader.caseload()
 train = []
@@ -39,10 +40,10 @@ num_batches = int(num_samples/param.batch_size)
 
 encoder = CopyEncoder(vocab_size, param.embed_size, param.hidden_size)
 decoder = CopyDecoder(vocab_size, param.embed_size, param.hidden_size)
-if torch.cuda.is_available():
-    encoder.cuda()
-    decoder.cuda()
-    
+# if torch.cuda.is_available():
+#     encoder.cuda()
+#     decoder.cuda()
+
 for epoch in range(param.num_epochs):
     print("==================================================")
     print("Epoch ",epoch+1)
