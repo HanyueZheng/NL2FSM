@@ -59,6 +59,10 @@ while(samples_read<len(test)):
     data = test[samples_read:min(samples_read+param.batch_size,len(test))]
     try:
         inputs, outputs = batch.process_minibatch(data, vocab)
+        print("inpurs:")
+        print(inputs)
+        print("outputs:")
+        print(outputs)
     except Exception as e:
         print(e)
         pdb.set_trace()
