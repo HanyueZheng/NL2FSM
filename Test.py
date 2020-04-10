@@ -224,7 +224,7 @@ while(samples_read<len(test)):
             else:
                 truth_print.append(i)
         try:
-            for i in out[idx, :, :].max(1)[1].cpu().data.numpy():
+            for i in np.array(out[idx, :, :]).max(1)[1].cpu().data.numpy():
                 if i == 3:
                     break
                 else:
@@ -248,7 +248,7 @@ while(samples_read<len(test)):
         line4 = 'Predicted:    ' + ''.join(vocab.idx_list_to_word_list(predict_print, batch.idx2oov_list[idx]))
         out = []
         print("type")
-        
+
         for i in range(len(''.join(vocab.idx_list_to_word_list(predict_print, batch.idx2oov_list[idx])).split())):
             out.append(vocab.idx2word(i))
 
