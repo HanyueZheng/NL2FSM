@@ -16,20 +16,66 @@ inputfile1 = "ie_out.txt"
 device = "cpu"
 dataloader1 = DataLoader(inputfile1, targetfile1, device)
 vocab_size = dataloader1.idx
+vocab = Vocab(vocab_size)
+vocab.w2i = dataloader1.word2idx
+vocab.i2w = dataloader1.idx2word
+vocab.count = len(vocab.w2i)
 
 targetfile = "test_input.txt"
 inputfile = "test_target.txt"
-dataloader = DataLoader(inputfile, targetfile, device)
-x, y = dataloader.caseload()
+description = ""
+target = []
+nl = []
+with open(targetfile, 'r', encoding="utf8") as f:
+    lines = f.readlines()
+    for line in lines:
+        if line != "\n":
+            description += line
+
+        else:
+            target.append(description)
+            description = ""
+    target.append(description)
+
+with open(inputfile, 'r', encoding="utf8") as f:
+    lines = f.readlines()
+    for line in lines:
+        if line != "\n":
+            description += line
+        else:
+            nl.append(description)
+            description = ""
+    nl.append(description)
 test = []
-for i in range(min(len(x), len(y))):
-    try:
-        x_new = [str(x) for x in dataloader.list_string(x[i])]
-        y_new = [str(y) for y in dataloader.list_string(y[i])]
-        testline = ",".join(x_new) + "\t" +  ",".join(y_new)
-    except Exception as e:
-        pdb.set_trace()
-        print(e)
+new_nl = []
+new_target = []
+for i in range(min(len(nl), len(target))):
+    string = nl[i].split()
+    new_nl = [0] * len(string)
+    for c in range(len(string)):
+        try:
+            if c in vocab.w2i:
+                new_nl[c] = vocab.w2i[string[c]]
+            else:
+                new_nl[c] = "<UNK>"
+        except Exception as e:
+            # pdb.set_trace()
+            print(string[c])
+            print(e)
+
+    string = target[i].split()
+    new_target = [0] * len(string)
+    for c in range(len(string)):
+        try:
+            if c in vocab.w2i:
+                new_target[c] = vocab.w2i[string[c]]
+            else:
+                new_target[c] = "<UNK>"
+        except Exception as e:
+            # pdb.set_trace()
+            print(string[c])
+            print(e)
+    testline = ",".join(new_nl) + "\t" +  ",".join(new_target)
     test.append(testline)
 
 batch = Batch(file_list=[],max_in_len=30,max_out_len=30,max_oovs=12)
@@ -45,13 +91,9 @@ epoch = 40
 encoder = torch.load(f='model/encoder_%s_%s.pckl' % ("copynet",str(epoch)))
 decoder = torch.load(f='model/decoder_%s_%s.pckl' % ("copynet",str(epoch)))
 
-batch.init_batch()
-vocab = Vocab(vocab_size)
-vocab.w2i = dataloader1.word2idx
-vocab.i2w = dataloader1.idx2word
-vocab.count = len(vocab.w2i)
 correct = 0
 samples_read = 0
+batch.init_batch()
 total = len(test)
 print_list = []
 while(samples_read<len(test)):
