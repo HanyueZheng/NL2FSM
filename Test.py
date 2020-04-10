@@ -66,7 +66,7 @@ for i in range(min(len(nl), len(target))):
     new_nl = [0] * len(string)
     for c in range(len(string)):
         try:
-            if c not in vocab.w2i:
+            if string[c] not in vocab.w2i:
                 new_nl[c] = "<UNK>"
 
             else:
@@ -81,7 +81,7 @@ for i in range(min(len(nl), len(target))):
     new_target = [0] * len(string)
     for c in range(len(string)):
         try:
-            if c not in vocab.w2i:
+            if string[c] not in vocab.w2i:
                 new_target[c] = "<UNK>"
             else:
                 new_target[c] = vocab.w2i[string[c]]
