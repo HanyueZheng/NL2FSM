@@ -137,7 +137,7 @@ while(samples_read<len(test)):
     except Exception as e:
         print(e)
         pdb.set_trace()
-    pad_out = pack_padded_sequence(out, batch.output_lens, batch_first=True)[0]
+    pad_out = pack_padded_sequence(out, out_len.tolist(), batch_first=True)[0]
     for idx in range(len(data)):
         input_print = []
         truth_print = []
