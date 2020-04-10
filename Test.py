@@ -59,10 +59,13 @@ new_nl = []
 new_target = []
 for i in range(min(len(nl), len(target))):
     string = nl[i].split()
+    print("string")
+    print(string)
     new_nl = [0] * len(string)
     for c in range(len(string)):
         try:
             if c in vocab.w2i:
+                print("inininin")
                 new_nl[c] = vocab.w2i[string[c]]
             else:
                 new_nl[c] = "<UNK>"
