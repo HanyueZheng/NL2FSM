@@ -133,7 +133,7 @@ while(samples_read<len(test)):
 
     # 1.9.2. get padded versions of target and output
     try:
-        target = pack_padded_sequence(target_outputs, batch.output_lens, batch_first=True)[0]
+        target = pack_padded_sequence(target_outputs, out_len.tolist(), batch_first=True)[0]
     except Exception as e:
         print(e)
         pdb.set_trace()
