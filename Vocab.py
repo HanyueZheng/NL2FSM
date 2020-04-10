@@ -9,7 +9,7 @@ class Vocab(object):
 		self.i2w = {}
 		self.count = 0
 		self.max_size = max_size
-		#self.nlp = spacy.load("en")
+		self.nlp = spacy.load("en")
 		#nlp = en.load()
 		self.counter = Counter()
 
