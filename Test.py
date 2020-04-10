@@ -66,11 +66,12 @@ for i in range(min(len(nl), len(target))):
     new_nl = [0] * len(string)
     for c in range(len(string)):
         try:
-            if c in vocab.w2i:
+            if c not in vocab.w2i:
+                new_nl[c] = "<UNK>"
+
+            else:
                 print("inininin")
                 new_nl[c] = vocab.w2i[string[c]]
-            else:
-                new_nl[c] = "<UNK>"
         except Exception as e:
             # pdb.set_trace()
             print(string[c])
@@ -80,10 +81,10 @@ for i in range(min(len(nl), len(target))):
     new_target = [0] * len(string)
     for c in range(len(string)):
         try:
-            if c in vocab.w2i:
-                new_target[c] = vocab.w2i[string[c]]
-            else:
+            if c not in vocab.w2i:
                 new_target[c] = "<UNK>"
+            else:
+                new_target[c] = vocab.w2i[string[c]]
         except Exception as e:
             # pdb.set_trace()
             print(string[c])
