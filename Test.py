@@ -109,19 +109,25 @@ while(samples_read<len(test)):
                 print(e)
                 pdb.set_trace()
             out = torch.cat([out, tmp_out], dim=1)
+            print("out")
+            print(out)
+            print(out.size())
+            print("y,size")
+            print(y.size())
         # for debugging: stop if nan
-        if math.isnan(w[-1][0][0].data[0]):
-            print("NaN detected!")
-            sys.exit()
+        #if math.isnan(w[-1][0][0].data[0]):
+         #   print("NaN detected!")
+          #  sys.exit()
 
             # 1.8.1. select next input
             #         decoder_in = y[:,j] # train with ground truth
         if j == 0:
             out[0, -1, vocab.w2i['(']] = 1
         decoder_in = out[:, -1, :].max(1)[1]  # train with prev outputs
-        unked_decoder_in = batch.unk_minibatch(decoder_in.cpu().data.numpy(), vocab)
+        #unked_decoder_in = batch.unk_minibatch(decoder_in.cpu().data.numpy(), vocab)
         #unked_decoder_in = Variable(torch.LongTensor(unked_decoder_in).cuda())
-        unked_decoder_in = Variable(torch.LongTensor(unked_decoder_in))
+        #unked_decoder_in = Variable(torch.LongTensor(unked_decoder_in))k
+        unk_decoder_in = Variable(torch.LongTensor(decoder_in))
     # 1.9.1. our targeted outputs should include OOV indices
     target_outputs = numpy_to_var(outputs[:, 1:])
 
