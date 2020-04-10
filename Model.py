@@ -142,7 +142,11 @@ class CopyDecoder(nn.Module):
 		# 	if (tmp_sum.data[0]>1e-6):
 		# 		attn[i] = attn[i] / tmp_sum.data[0]
 		attn = attn.unsqueeze(1) # [b x 1 x seq]
-		weighted = torch.bmm(attn, encoded) # weighted: [b x 1 x hidden*2]
+		try:
+			weighted = torch.bmm(attn, encoded) # weighted: [b x 1 x hidden*2]
+		except Exception as e:
+			print(e)
+			pdb.set_trace()
 		return out, state, weighted
 
 	def to_cuda(self, tensor):
