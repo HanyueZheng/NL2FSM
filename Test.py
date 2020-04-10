@@ -160,7 +160,15 @@ while(samples_read<len(test)):
             else:
                 predict_print.append(i)
         line0 = "\n==================================================================="
-        line1 = 'Input1:       ' + ''.join(vocab.idx_list_to_word_list(input_print, batch.idx2oov_list[idx]))
+        print("input_print:")
+        print(input_print)
+        print("truth_print:")
+        print(truth_print)
+        try:
+            line1 = 'Input1:       ' + ''.join(vocab.idx_list_to_word_list(input_print, batch.idx2oov_list[idx]))
+        except Exception as e:
+            print(e)
+            pdb.set_trace()
         line2 = 'Output:       ' + ''.join(vocab.idx_list_to_word_list(truth_print, batch.idx2oov_list[idx]))
         line3 = 'Predict[UNK]: ' + ''.join(vocab.idx_list_to_word_list(predict_print))
         line4 = 'Predicted:    ' + ''.join(vocab.idx_list_to_word_list(predict_print, batch.idx2oov_list[idx]))
