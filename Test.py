@@ -5,6 +5,7 @@ import Hyperparameter as param
 from Batch import Batch
 from Util import numpy_to_var, toData, decoder_initial
 from Vocab import Vocab
+import numpy as np
 import math
 import sys
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
@@ -46,6 +47,9 @@ decoder = torch.load(f='model/decoder_%s_%s.pckl' % ("copynet",str(epoch)))
 
 batch.init_batch()
 vocab = Vocab(vocab_size)
+vocab.w2i = dataloader1.word2idx
+vocab.i2w = dataloader1.idx2word
+vocab.count = len(vocab.w2i)
 correct = 0
 samples_read = 0
 total = len(test)
@@ -58,8 +62,8 @@ while(samples_read<len(test)):
     # 1.4.2. obtain batch outputs
     data = test[samples_read:min(samples_read+param.batch_size,len(test))]
     try:
-        #inputs, outputs = batch.process_minibatch(data, vocab)
-        inputs, outputs, in_len, out_len = toData(data)
+        inputs, outputs = batch.process_minibatch(data, vocab)
+        #inputs, outputs, in_len, out_len = toData(data)
         print("inpurs:")
         print(inputs)
         print("outputs:")
@@ -70,13 +74,15 @@ while(samples_read<len(test)):
     samples_read+=len(data)
 
     # 1.4.3. inputs and outputs must be unk-ed to put into model w/ limited vocab
-    #unked_inputs = batch.unk_minibatch(inputs,vocab)
-    #unked_outputs = batch.unk_minibatch(outputs,vocab)
+    unked_inputs = batch.unk_minibatch(inputs,vocab)
+    unked_outputs = batch.unk_minibatch(outputs,vocab)
 
-    x = numpy_to_var(inputs)
+    x = numpy_to_var(unked_inputs)
     print("x")
     print(x.size())
-    y = numpy_to_var(outputs)
+    y = numpy_to_var(unked_outputs)
+    print("y")
+    print(y.size())
 
     # 1.5. encoded outputs
     encoded, _ = encoder(x)
@@ -115,29 +121,29 @@ while(samples_read<len(test)):
             print("y,size")
             print(y.size())
         # for debugging: stop if nan
-        #if math.isnan(w[-1][0][0].data[0]):
-         #   print("NaN detected!")
-          #  sys.exit()
+        if math.isnan(w[-1][0][0].data[0]):
+            print("NaN detected!")
+            sys.exit()
 
             # 1.8.1. select next input
             #         decoder_in = y[:,j] # train with ground truth
-        #if j == 0:
-         #   out[0, -1, vocab.w2i['(']] = 1
+        if j == 0:
+            out[0, -1, vocab.w2i['(']] = 1
         decoder_in = out[:, -1, :].max(1)[1]  # train with prev outputs
-        #unked_decoder_in = batch.unk_minibatch(decoder_in.cpu().data.numpy(), vocab)
+        unked_decoder_in = batch.unk_minibatch(decoder_in.cpu().data.numpy(), vocab)
         #unked_decoder_in = Variable(torch.LongTensor(unked_decoder_in).cuda())
-        #unked_decoder_in = Variable(torch.LongTensor(unked_decoder_in))k
+        unked_decoder_in = Variable(torch.LongTensor(unked_decoder_in))
         unk_decoder_in = Variable(torch.LongTensor(decoder_in))
     # 1.9.1. our targeted outputs should include OOV indices
     target_outputs = numpy_to_var(outputs[:, 1:])
 
     # 1.9.2. get padded versions of target and output
     try:
-        target = pack_padded_sequence(target_outputs, out_len.tolist(), batch_first=True)[0]
+        target = pack_padded_sequence(target_outputs, batch.output_lens.tolist(), batch_first=True)[0]
     except Exception as e:
         print(e)
         pdb.set_trace()
-    pad_out = pack_padded_sequence(out, out_len.tolist(), batch_first=True)[0]
+    pad_out = pack_padded_sequence(out, batch.output_lens.tolist(), batch_first=True)[0]
     for idx in range(len(data)):
         input_print = []
         truth_print = []
