@@ -224,7 +224,7 @@ while(samples_read<len(test)):
             else:
                 truth_print.append(i)
         try:
-            for i in np.array(out[idx, :, :]).max(1)[1].cpu().data.detach().numpy():
+            for i in np.array(out[idx, :, :]).detach().max(1)[1].cpu().data.numpy():
                 if i == 3:
                     break
                 else:
