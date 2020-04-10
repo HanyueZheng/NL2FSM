@@ -70,7 +70,6 @@ for i in range(min(len(nl), len(target))):
                 new_nl[c] = "<UNK>"
 
             else:
-                print("inininin")
                 new_nl[c] = vocab.w2i[string[c]]
         except Exception as e:
             # pdb.set_trace()
@@ -89,7 +88,7 @@ for i in range(min(len(nl), len(target))):
             # pdb.set_trace()
             print(string[c])
             print(e)
-    testline = ",".join(new_nl) +  "\t" +  ",".join(new_target)
+    testline =str(",".join(new_nl)) +  "\t" +  str(",".join(new_target))
     test.append(testline)
 
 print("test")
