@@ -15,6 +15,8 @@ targetfile1 = "target.txt"
 inputfile1 = "ie_out.txt"
 device = "cpu"
 dataloader1 = DataLoader(inputfile1, targetfile1, device)
+x, y = dataloader1.caseload()
+
 vocab_size = dataloader1.idx
 vocab = Vocab(vocab_size)
 vocab.w2i = dataloader1.word2idx
