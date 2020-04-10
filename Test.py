@@ -223,15 +223,15 @@ while(samples_read<len(test)):
                 pass
             else:
                 truth_print.append(i)
-        # try:
-        #     for i in np.array(out[idx, :, :]).detach().max(1)[1].cpu().data.numpy():
-        #         if i == 3:
-        #             break
-        #         else:
-        #             predict_print.append(i)
-        # except Exception as e:
-        #     print(e)
-        #     pdb.set_trace()
+        try:
+            for i in out[idx, :, :].max(1)[1].cpu().data.numpy():
+                if i == 3:
+                    break
+                else:
+                    predict_print.append(i)
+        except Exception as e:
+            print(e)
+            pdb.set_trace()
         line0 = "\n==================================================================="
         print("input_print:")
         print(input_print)
@@ -244,7 +244,7 @@ while(samples_read<len(test)):
             print(e)
             pdb.set_trace()
         line2 = 'Output:       ' + ''.join(vocab.idx_list_to_word_list(truth_print, batch.idx2oov_list[idx]))
-        #line3 = 'Predict[UNK]: ' + ''.join(vocab.idx_list_to_word_list(predict_print))
+        line3 = 'Predict[UNK]: ' + ''.join(vocab.idx_list_to_word_list(predict_print))
         line4 = 'Predicted:    ' + ''.join(vocab.idx_list_to_word_list(predict_print, batch.idx2oov_list[idx]))
         out = []
         print("type")
