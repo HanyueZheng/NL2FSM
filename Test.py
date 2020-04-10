@@ -58,7 +58,8 @@ while(samples_read<len(test)):
     # 1.4.2. obtain batch outputs
     data = test[samples_read:min(samples_read+param.batch_size,len(test))]
     try:
-        inputs, outputs = batch.process_minibatch(data, vocab)
+        #inputs, outputs = batch.process_minibatch(data, vocab)
+        inputs, outputs, in_len, out_len = toData(batch)
         print("inpurs:")
         print(inputs)
         print("outputs:")
@@ -69,12 +70,13 @@ while(samples_read<len(test)):
     samples_read+=len(data)
 
     # 1.4.3. inputs and outputs must be unk-ed to put into model w/ limited vocab
-    unked_inputs = batch.unk_minibatch(inputs,vocab)
-    unked_outputs = batch.unk_minibatch(outputs,vocab)
-    x = numpy_to_var(unked_inputs)
+    #unked_inputs = batch.unk_minibatch(inputs,vocab)
+    #unked_outputs = batch.unk_minibatch(outputs,vocab)
+    
+    x = numpy_to_var(inputs)
     print("x")
     print(x.size())
-    y = numpy_to_var(unked_outputs)
+    y = numpy_to_var(outputs)
 
     # 1.5. encoded outputs
     encoded, _ = encoder(x)
