@@ -13,11 +13,6 @@ class Vocab(object):
 		#nlp = en.load()
 		self.counter = Counter()
 
-		for w in ['<PAD>', '<UNK>', '<SOS>', '<EOS>']:
-			self.w2i[w] = self.count
-			self.i2w[self.count] = w
-			self.count += 1
-
 	# def add_from_counter_list(self, counter_list):
 	# 	# list takes form of [(word, freq), (word, freq), ..., ]
 

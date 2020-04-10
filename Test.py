@@ -20,6 +20,10 @@ vocab = Vocab(vocab_size)
 vocab.w2i = dataloader1.word2idx
 vocab.i2w = dataloader1.idx2word
 vocab.count = len(vocab.w2i)
+for w in ['<PAD>', '<UNK>', '<SOS>', '<EOS>']:
+    vocab.w2i[w] = vocab.count
+    vocab.i2w[vocab.count] = w
+    vocab.count += 1
 
 targetfile = "test_input.txt"
 inputfile = "test_target.txt"
@@ -77,6 +81,8 @@ for i in range(min(len(nl), len(target))):
             print(e)
     testline = ",".join(new_nl) + "\t" +  ",".join(new_target)
     test.append(testline)
+
+print(test)
 
 batch = Batch(file_list=[],max_in_len=30,max_out_len=30,max_oovs=12)
 batch.num_of_minibatch=len(test)/param.batch_size
