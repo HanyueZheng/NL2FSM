@@ -68,6 +68,8 @@ while(samples_read<len(test)):
     unked_inputs = batch.unk_minibatch(inputs,vocab)
     unked_outputs = batch.unk_minibatch(outputs,vocab)
     x = numpy_to_var(unked_inputs)
+    print("x")
+    print(x.size())
     y = numpy_to_var(unked_outputs)
 
     # 1.5. encoded outputs
