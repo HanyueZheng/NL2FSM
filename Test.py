@@ -180,7 +180,7 @@ while(samples_read<len(test)):
             print("y,size")
             print(y.size())
         # for debugging: stop if nan
-        if math.isnan(w[-1][0][0].data[0]):
+        if math.isnan(w[-1][0][0].item()):
             print("NaN detected!")
             sys.exit()
 
@@ -223,11 +223,15 @@ while(samples_read<len(test)):
                 pass
             else:
                 truth_print.append(i)
-        for i in out[idx, :, :].max(1)[1].cpu().data.numpy():
-            if i == 3:
-                break
-            else:
-                predict_print.append(i)
+        try:
+            for i in out[idx, :, :].max(1)[1].cpu().data.numpy():
+                if i == 3:
+                    break
+                else:
+                    predict_print.append(i)
+        except Exception as e:
+            print(e)
+            pdb.set_trace()
         line0 = "\n==================================================================="
         print("input_print:")
         print(input_print)
