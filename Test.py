@@ -244,7 +244,7 @@ while(samples_read<len(test)):
             print(e)
             pdb.set_trace()
         line2 = 'Output:       ' + ''.join(vocab.idx_list_to_word_list(truth_print, batch.idx2oov_list[idx]))
-        line3 = 'Predict[UNK]: ' + ''.join(vocab.idx_list_to_word_list(predict_print))
+        #line3 = 'Predict[UNK]: ' + ''.join(vocab.idx_list_to_word_list(predict_print))
         line4 = 'Predicted:    ' + ''.join(vocab.idx_list_to_word_list(predict_print, batch.idx2oov_list[idx]))
         out = []
         print("type")
@@ -256,7 +256,7 @@ while(samples_read<len(test)):
         if line2[14:] == line4[14:]:
             correct += 1
             line4 += '\n***CORRECT***'
-        print_list.extend([line0, line1, line2, line3, line4])
+        print_list.extend([line0, line1, line2, line4])
         print("print_list:")
         print(print_list)
         # with open('test_results_%s_epoch_%d_acc_%1.3f.txt'
