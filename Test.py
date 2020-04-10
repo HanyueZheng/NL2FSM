@@ -17,7 +17,7 @@ device = "cpu"
 dataloader1 = DataLoader(inputfile1, targetfile1, device)
 x, y = dataloader1.caseload()
 
-vocab_size = dataloader1.idx
+vocab_size = 5000
 vocab = Vocab(vocab_size)
 vocab.w2i = dataloader1.word2idx
 print("vocab.w2i")
