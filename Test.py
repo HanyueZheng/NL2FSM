@@ -244,6 +244,8 @@ while(samples_read<len(test)):
             correct += 1
             line4 += '\n***CORRECT***'
         print_list.extend([line0, line1, line2, line3, line4])
+        print("print_list:")
+        print(print_list)
         # with open('test_results_%s_epoch_%d_acc_%1.3f.txt'
         #           %(version,epoch+continue_from,correct*1.0/total),'w') as f:
         #     f.write('\n'.join(print_list))
