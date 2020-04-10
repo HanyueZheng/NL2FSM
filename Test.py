@@ -132,8 +132,8 @@ while(samples_read<len(test)):
     target_outputs = numpy_to_var(outputs[:, 1:])
 
     # 1.9.2. get padded versions of target and output
-    target = pack_padded_sequence(target_outputs, batch.output_lens.tolist(), batch_first=True)[0]
-    pad_out = pack_padded_sequence(out, batch.output_lens.tolist(), batch_first=True)[0]
+    target = pack_padded_sequence(target_outputs, batch.output_lens, batch_first=True)[0]
+    pad_out = pack_padded_sequence(out, batch.output_lens, batch_first=True)[0]
     for idx in range(len(data)):
         input_print = []
         truth_print = []
