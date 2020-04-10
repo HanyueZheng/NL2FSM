@@ -20,8 +20,8 @@ x, y = dataloader1.caseload()
 vocab_size = 5000
 vocab = Vocab(vocab_size)
 vocab.w2i = dataloader1.word2idx
-print("vocab.w2i")
-print(vocab.w2i)
+print("vocab.i2w")
+print(vocab.i2w)
 vocab.i2w = dataloader1.idx2word
 vocab.count = len(vocab.w2i)
 for w in ['<PAD>', '<UNK>', '<SOS>', '<EOS>']:
@@ -234,17 +234,13 @@ while(samples_read<len(test)):
         print(truth_print)
         try:
             line1 = 'Input1:       ' + ''.join(vocab.idx_list_to_word_list(input_print, batch.idx2oov_list[idx]))
+
         except Exception as e:
             print(e)
             pdb.set_trace()
         line2 = 'Output:       ' + ''.join(vocab.idx_list_to_word_list(truth_print, batch.idx2oov_list[idx]))
         line3 = 'Predict[UNK]: ' + ''.join(vocab.idx_list_to_word_list(predict_print))
         line4 = 'Predicted:    ' + ''.join(vocab.idx_list_to_word_list(predict_print, batch.idx2oov_list[idx]))
-        line1 = line1.replace('var', 'var ')
-        line1 = line1.replace(';', ';\nInput2:       ')
-        line2 = line2.replace('var', 'var ')
-        line3 = line3.replace('var', 'var ')
-        line4 = line4.replace('var', 'var ')
         if line2[14:] == line4[14:]:
             correct += 1
             line4 += '\n***CORRECT***'
