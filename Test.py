@@ -223,15 +223,15 @@ while(samples_read<len(test)):
                 pass
             else:
                 truth_print.append(i)
-        try:
-            for i in np.array(out[idx, :, :]).detach().max(1)[1].cpu().data.numpy():
-                if i == 3:
-                    break
-                else:
-                    predict_print.append(i)
-        except Exception as e:
-            print(e)
-            pdb.set_trace()
+        # try:
+        #     for i in np.array(out[idx, :, :]).detach().max(1)[1].cpu().data.numpy():
+        #         if i == 3:
+        #             break
+        #         else:
+        #             predict_print.append(i)
+        # except Exception as e:
+        #     print(e)
+        #     pdb.set_trace()
         line0 = "\n==================================================================="
         print("input_print:")
         print(input_print)
