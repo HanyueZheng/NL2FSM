@@ -28,6 +28,8 @@ for w in ['<PAD>', '<UNK>', '<SOS>', '<EOS>']:
     vocab.w2i[w] = vocab.count
     vocab.i2w[vocab.count] = w
     vocab.count += 1
+print("<unk>")
+print(vocab.w2i['<UNK>'])
 
 targetfile = "test_input.txt"
 inputfile = "test_target.txt"

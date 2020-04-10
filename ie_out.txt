@@ -22,7 +22,7 @@ Conditions for entering the Power On Reset:
 <phrase>• </phrase><phrase>VBAT</phrase> is below the <phrase>VBAT</phrase>_POD <phrase>AND</phrase> <phrase>VCC</phrase> is below <phrase>VCC</phrase>_UV threshold.
 Conditions for leaving the Power On Reset:
 <phrase>• </phrase>Once the power supply voltage <phrase>VBAT</phrase> <phrase>OR</phrase> <phrase>VCC</phrase> is within the functional <phrase>range</phrase> the transceiver enters Stand-by Mode within tPON.
-<phrase>The internal Power On Reset flag </phrase>will be<phrase> set</phrase>. After <phrase>Power On Reset the TLE9252V enters Stand-by Mode</phrase>.
+<phrase>The the internal Power On Reset flag </phrase>will be<phrase> set</phrase>. After <phrase>Power On Reset the TLE9252V enters Stand-by Mode</phrase>.
 
 When <phrase>TXBNCTRL</phrase>.<phrase><phrase>TXREQ</phrase></phrase> is<phrase> set</phrase>, the <phrase>TXBNCTRL</phrase>.<phrase><phrase>ABTF</phrase></phrase>, <phrase>TXBNCTRL</phrase>.<phrase><phrase>MLOA</phrase></phrase> and <phrase>TXBNCTRL</phrase>.<phrase><phrase>TXERR</phrase></phrase> <phrase>bits</phrase> will be<phrase> cleared</phrase>.
 Setting the <phrase>TXBNCTRL</phrase>.<phrase><phrase>TXREQ</phrase></phrase> <phrase>bit</phrase> does not initiate amessage transmission, it merely <phrase>flags</phrase> a message buffer as ready for transmission.<phrase> Transmission will start </phrase>when <phrase>the device detects that the <phrase>bus</phrase> is available</phrase>. The device will then begin transmission of the highest priority message that is ready. When the <phrase>transmission has completed successfully</phrase> the
