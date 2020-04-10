@@ -243,10 +243,12 @@ while(samples_read<len(test)):
         line3 = 'Predict[UNK]: ' + ''.join(vocab.idx_list_to_word_list(predict_print))
         line4 = 'Predicted:    ' + ''.join(vocab.idx_list_to_word_list(predict_print, batch.idx2oov_list[idx]))
         out = []
-        for i in range(len(''.join(vocab.idx_list_to_word_list(predict_print, batch.idx2oov_list[idx])))):
-            out.append(vocab.idx2word(i))
-
-        line4 = "PPPPPPP" + ''.join(out)
+        print("type")
+        print(''.join(vocab.idx_list_to_word_list(predict_print, batch.idx2oov_list[idx])).type())
+        # for i in range(len(''.join(vocab.idx_list_to_word_list(predict_print, batch.idx2oov_list[idx])))):
+        #     out.append(vocab.idx2word(i))
+		#
+        # line4 = "PPPPPPP" + ''.join(out)
         if line2[14:] == line4[14:]:
             correct += 1
             line4 += '\n***CORRECT***'
