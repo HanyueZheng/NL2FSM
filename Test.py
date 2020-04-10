@@ -86,6 +86,7 @@ for i in range(min(len(nl), len(target))):
     testline = ",".join(new_nl) + "\t" +  ",".join(new_target)
     test.append(testline)
 
+print("test")
 print(test)
 
 batch = Batch(file_list=[],max_in_len=30,max_out_len=30,max_oovs=12)
