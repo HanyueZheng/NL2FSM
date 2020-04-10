@@ -48,7 +48,7 @@ class Batch(object):
 	# 	# fixes lengths
 	# 	return stories, summaries
 
-	def process_minibatch(self,minibatch, vocab, deliminator=":==:"):
+	def process_minibatch(self,minibatch, vocab, deliminator="\t"):
 		"""
 		Args.
 		minibatch : text corpus or list
