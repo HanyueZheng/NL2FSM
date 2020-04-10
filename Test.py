@@ -20,9 +20,10 @@ x, y = dataloader1.caseload()
 vocab_size = 5000
 vocab = Vocab(vocab_size)
 vocab.w2i = dataloader1.word2idx
+
+vocab.i2w = dataloader1.idx2word
 print("vocab.i2w")
 print(vocab.i2w)
-vocab.i2w = dataloader1.idx2word
 vocab.count = len(vocab.w2i)
 for w in ['<PAD>', '<UNK>', '<SOS>', '<EOS>']:
     vocab.w2i[w] = vocab.count
