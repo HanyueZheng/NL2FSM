@@ -176,7 +176,11 @@ while(samples_read<len(test)):
             # 1.8.1. select next input
             #         decoder_in = y[:,j] # train with ground truth
         if j == 0:
-            out[0, -1, vocab.w2i['(']] = 1
+            try:
+                out[0, -1, vocab.w2i['(']] = 1
+            except Exception as e:
+                print(e)
+                pdb.set_trace()
         decoder_in = out[:, -1, :].max(1)[1]  # train with prev outputs
         unked_decoder_in = batch.unk_minibatch(decoder_in.cpu().data.numpy(), vocab)
         #unked_decoder_in = Variable(torch.LongTensor(unked_decoder_in).cuda())
