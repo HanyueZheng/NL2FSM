@@ -83,7 +83,7 @@ for i in range(min(len(nl), len(target))):
             # pdb.set_trace()
             print(string[c])
             print(e)
-    testline = ",".join(new_nl) + "\t" +  ",".join(new_target)
+    testline = ",".join(new_nl) +  "\t" +  ",".join(new_target)
     test.append(testline)
 
 print("test")
