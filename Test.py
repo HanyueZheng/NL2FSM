@@ -93,9 +93,13 @@ while(samples_read<len(test)):
             #             out[2,0,vocab.w2i['codeMirror']]=1
         # remaining states - add results to [out]
         else:
-            tmp_out, s, w = decoder(input_idx=unked_decoder_in.squeeze(), encoded=encoded,
+            try:
+                tmp_out, s, w = decoder(input_idx=unked_decoder_in.squeeze(), encoded=encoded,
                                     encoded_idx=inputs, prev_state=s,
                                     weighted=w, order=j)
+            except Exception as e:
+                print(e)
+                pdb.set_trace()
             out = torch.cat([out, tmp_out], dim=1)
         # for debugging: stop if nan
         if math.isnan(w[-1][0][0].data[0]):
