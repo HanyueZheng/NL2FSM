@@ -98,7 +98,7 @@ for i in range(min(len(nl), len(target))):
 print("test")
 print(test)
 
-batch = Batch(file_list=[],max_in_len=5000,max_out_len=5000,max_oovs=500)
+batch = Batch(file_list=[],max_in_len=1500,max_out_len=1500,max_oovs=800)
 batch.num_of_minibatch=len(test)/param.batch_size
 
 # get number of batches
@@ -151,7 +151,7 @@ while(samples_read<len(test)):
     decoder_in = y[:,0]
 
     # 1.7. for each decoder timestep
-    for j in range(y.size(1) - 1):  # for all sequences
+    for c in range(y.size(1) - 1):  # for all sequences
         """
 		decoder_in (Variable): [b]
 		encoded (Variable): [b x seq x hid]
@@ -159,17 +159,17 @@ while(samples_read<len(test)):
 		s (Variable): [b x hid]
 		"""
         # 1.7.1.1st state - create [out]
-        if j == 0:
-            out, s, w = decoder(input_idx=y[:, j], encoded=encoded,
+        if c == 0:
+            out, s, w = decoder(input_idx=y[:, c], encoded=encoded,
                                 encoded_idx=inputs, prev_state=s,
-                                weighted=w, order=j)
+                                weighted=w, order=c)
             #             out[2,0,vocab.w2i['codeMirror']]=1
         # remaining states - add results to [out]
         else:
             try:
                 tmp_out, s, w = decoder(input_idx=decoder_in.squeeze(), encoded=encoded,
                                     encoded_idx=inputs, prev_state=s,
-                                    weighted=w, order=j)
+                                    weighted=w, order=c)
             except Exception as e:
                 print(e)
                 pdb.set_trace()
@@ -186,7 +186,7 @@ while(samples_read<len(test)):
 
             # 1.8.1. select next input
             #         decoder_in = y[:,j] # train with ground truth
-        if j == 0:
+        if c == 0:
             try:
                 out[0, -1, vocab.w2i['(']] = 1
             except Exception as e:
@@ -242,13 +242,9 @@ while(samples_read<len(test)):
         line2 = 'Output:       ' + ''.join(vocab.idx_list_to_word_list(truth_print, batch.idx2oov_list[idx]))
         line3 = 'Predict[UNK]: ' + ''.join(vocab.idx_list_to_word_list(predict_print))
         line4 = 'Predicted:    ' + ''.join(vocab.idx_list_to_word_list(predict_print, batch.idx2oov_list[idx]))
-        out = []
         print("type")
 
-        for i in range(len(''.join(vocab.idx_list_to_word_list(predict_print, batch.idx2oov_list[idx])).split())):
-            out.append(vocab.idx2word(i))
 
-        line4 = "PPPPPPP" + ''.join(out)
         if line2[14:] == line4[14:]:
             correct += 1
             line4 += '\n***CORRECT***'

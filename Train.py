@@ -32,7 +32,7 @@ for i in range(min(len(x), len(y))):
         pdb.set_trace()
         print(e)
     train.append(trainline)
-vocab_size = 5000
+vocab_size = 1500
 
 # get number of batches
 num_samples = len(train)
