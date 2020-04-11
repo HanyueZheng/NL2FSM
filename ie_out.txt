@@ -9,6 +9,18 @@ Once the <phrase>transmission has completed successfully</phrase>, the <phrase><
 <phrase>• </phrase></phrase>If the message <phrase>started to transmit</phrase> but <phrase>encountered an error condition</phrase>, the <phrase><phrase>TXERR</phrase></phrase> (<phrase>TXBnCTRL[4</phrase>]) and <phrase>MERRF</phrase> <phrase>bits</phrase> (<phrase>CAN</phrase><phrase>INT</phrase>F[7]) will be<phrase> set</phrase>, and <phrase>an interrupt will be generated</phrase> on the <phrase>INT</phrase> pin if the <phrase>MERRE</phrase> <phrase>bit</phrase> (<phrase>CAN</phrase><phrase>INT</phrase><phrase>E</phrase>[7]) is<phrase> set</phrase>.
 <phrase>• </phrase>If <phrase>the message is lost</phrase>, <phrase>arbitration</phrase> at the <phrase><phrase>MLOA</phrase></phrase> <phrase>bit</phrase> (TXBnCTRL[5]) will be<phrase> set</phrase>.
 
+<phrase>The MCP2542FD/4FD and MCP2542WFD/4WFD enter <phrase>Unpowered mode</phrase> under the following conditions:
+•After powering up the device, or
+•</phrase>If <phrase>VDD</phrase> drops below VP<phrase>OR</phrase>L, or
+•If <phrase>VIO</phrase> drops below VP<phrase>OR</phrase>L_<phrase>VIO</phrase>.
+The MCP2542FD/4FD and MCP2542WFD/4WFD transitions from <phrase>Unpowered mode</phrase> to <phrase>Wake mode</phrase> when <phrase>VDD</phrase> and <phrase>VIO</phrase> are above their P<phrase>OR</phrase>H levels.<phrase><phrase> From <phrase><phrase>Normal mode</phrase></phrase>, </phrase>the device will also enter <phrase>Wake mode</phrase> </phrase>if <phrase>VDD</phrase> is smaller than VUVL, or if the <phrase>band</phrase> gap output voltage is not within valid <phrase>range</phrase>. Additionally, the device will transition from <phrase>Standby mode</phrase> to <phrase>Wake mode</phrase> if <phrase><phrase>STBY</phrase> is pulled Low</phrase>.
+In <phrase>Wake mode</phrase>, the <phrase>CAN</phrase> <phrase>bus</phrase> is biased to ground and <phrase>RXD</phrase> is always <phrase>high</phrase>.
+When <phrase>VDD</phrase> exceeds VUVH, the <phrase>band</phrase> gap is within valid <phrase>range</phrase> and <phrase>TXD</phrase> is <phrase>High</phrase>, the device transitions into <phrase><phrase>Normal mode</phrase></phrase>.
+The device may be placed in <phrase>Standby mode</phrase> by applying a <phrase>high</phrase> level to the <phrase>STBY</phrase> pin. In <phrase>Standby mode</phrase>, the transmitter and the <phrase>high</phrase>-speed part of the receiver are switched off to minimize power consumption.
+<phrase>The MCP2542WFD/4WFD wakes up from <phrase>Standby/<phrase>Silent mode</phrase></phrase> </phrase>when a dedicated wake-up pattern (<phrase>WUP</phrase>) is detected on the <phrase>CAN</phrase> <phrase>bus</phrase>. The wake-up pattern is specified in <phrase><phrase>ISO</phrase></phrase> 11898-6 and <phrase><phrase>ISO</phrase></phrase>11898-2:2016
+
+
+
 The HI-3110 transmit buffer consists of an eight message <phrase>FIFO</phrase> which allows transmission of up to eight messages. Messages are loaded to the transmit <phrase>FIFO</phrase> via <phrase>SPI</phrase> instruction. The
 next message to be<phrase> transmitted</phrase> (or current message trying to gain access to the <phrase>bus</phrase>) is loaded from the <phrase>FIFO</phrase> to the Transmit Buffer.<phrase> This will happen automatically </phrase>if <phrase>TXEN</phrase> or TX1M are<phrase> set</phrase> in CTRL1. If <phrase>the <phrase>bus</phrase> is available, the message is sent</phrase>. The Transmit <phrase>History</phrase> <phrase>FIFO</phrase> can optionally be used by<phrase> the host to keep a record of up to eight successfully<phrase> transmitted</phrase> messages</phrase>. The current transmission <phrase>sequence</phrase> can also be paused by resetting the <phrase>TXEN</phrase> <phrase>bit</phrase> in CTRL1 (or pulling <phrase>TXEN</phrase> pin low).<phrase> In this case, the current message </phrase>will be completed and any remaining messages in the transmit <phrase>FIFO</phrase> will not be<phrase> transmitted</phrase>.
 If the current message transmission goes ahead, two things can happen:
@@ -36,16 +48,6 @@ The <phrase>MAB</phrase> assembles all messages received.<phrase><phrase> These 
 <phrase>if a message has an error </phrase>before the end of frame, that portion of the message assembled in the <phrase>MAB</phrase> before the error frame will be<phrase> loaded into the buffer</phrase>. <phrase>This mode</phrase> has some value in
 <phrase>debugging</phrase> a <phrase>CAN</phrase> system and would not be used in an actual system environment.
 
-<phrase>The MCP2542FD/4FD and MCP2542WFD/4WFD enter <phrase>Unpowered mode</phrase> under the following conditions:
-•After powering up the device, or
-•</phrase>If <phrase>VDD</phrase> drops below VP<phrase>OR</phrase>L, or
-•If <phrase>VIO</phrase> drops below VP<phrase>OR</phrase>L_<phrase>VIO</phrase>.
-
-The MCP2542FD/4FD and MCP2542WFD/4WFD transitions from <phrase>Unpowered mode</phrase> to <phrase>Wake mode</phrase> when <phrase>VDD</phrase> and <phrase>VIO</phrase> are above their P<phrase>OR</phrase>H levels.<phrase><phrase> From <phrase><phrase>Normal mode</phrase></phrase>, </phrase>the device will also enter <phrase>Wake mode</phrase> </phrase>if <phrase>VDD</phrase> is smaller than VUVL, or if the <phrase>band</phrase> gap output voltage is not within valid <phrase>range</phrase>. Additionally, the device will transition from <phrase>Standby mode</phrase> to <phrase>Wake mode</phrase> if <phrase><phrase>STBY</phrase> is pulled Low</phrase>.
-In <phrase>Wake mode</phrase>, the <phrase>CAN</phrase> <phrase>bus</phrase> is biased to ground and <phrase>RXD</phrase> is always <phrase>high</phrase>.
-When <phrase>VDD</phrase> exceeds VUVH, the <phrase>band</phrase> gap is within valid <phrase>range</phrase> and <phrase>TXD</phrase> is <phrase>High</phrase>, the device transitions into <phrase><phrase>Normal mode</phrase></phrase>.
-The device may be placed in <phrase>Standby mode</phrase> by applying a <phrase>high</phrase> level to the <phrase>STBY</phrase> pin. In <phrase>Standby mode</phrase>, the transmitter and the <phrase>high</phrase>-speed part of the receiver are switched off to minimize power consumption.
-<phrase>The MCP2542WFD/4WFD wakes up from <phrase>Standby/<phrase>Silent mode</phrase></phrase> </phrase>when a dedicated wake-up pattern (<phrase>WUP</phrase>) is detected on the <phrase>CAN</phrase> <phrase>bus</phrase>. The wake-up pattern is specified in <phrase><phrase>ISO</phrase></phrase> 11898-6 and <phrase><phrase>ISO</phrase></phrase>11898-2:2016
 
 <phrase>Failsafe is the method the device uses to enter <phrase>sleep mode</phrase> from various other modes </phrase>when <phrase>specific issues arise</phrase>.<phrase> This feature uses the Sleep Wake Error (<phrase>SWE</phrase>) timer to determine </phrase>if the node processor can communicate to the T<phrase>CAN</phrase>4550-Q1.
 Upon <phrase>power up</phrase> the <phrase>SWE</phrase> timer starts, tINACTIVE, the processor has typically four minutes to configure the T<phrase>CAN</phrase>4550-Q1, clear the <phrase>PWRON</phrase> flag or configure the device for <phrase>normal mode</phrase>.

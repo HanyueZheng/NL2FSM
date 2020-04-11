@@ -36,7 +36,7 @@ vocab_size = 1500
 
 # get number of batches
 num_samples = len(train)
-num_batches = int(num_samples/param.batch_size)
+num_batches = int(num_samples/1)
 
 encoder = CopyEncoder(vocab_size, param.embed_size, param.hidden_size)
 decoder = CopyDecoder(vocab_size, param.embed_size, param.hidden_size)
@@ -57,7 +57,7 @@ for epoch in range(param.num_epochs):
         opt_d.zero_grad()
 
         # obtain batch outputs
-        batch = train[samples_read:min(samples_read+param.batch_size,len(train))]
+        batch = train[samples_read:min(samples_read+1,len(train))]
         #batch = train[samples_read]
         input_out, output_out, in_len, out_len = toData(batch)
         samples_read+=len(batch)
