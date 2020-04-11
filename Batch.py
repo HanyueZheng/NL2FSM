@@ -59,7 +59,7 @@ class Batch(object):
 		stories = []
 		summaries = []
 		if type(minibatch)==str:
-			minibatch = minibatch.split('\n\n')
+			minibatch = minibatch.split('\n')
 		self.minibatch_size = len(minibatch)
 		# for each sample in minibatch
 		for line in minibatch:
@@ -69,8 +69,10 @@ class Batch(object):
 			except Exception as e:
 				print(e)
 				pdb.set_trace()
-			story = vocab.tokenize(story)[:self.max_in_len]
-			summary = vocab.tokenize(summary)[:self.max_out_len-2]
+			story = vocab.tokenize("".join('%s' %id for id in story))[:self.max_in_len]
+			summary = vocab.tokenize("".join('%s' %id for id in summary))[:self.max_out_len-2]
+			#len(vocab.tokenize(summary))
+			#len(summary)
 			summary = ['<SOS>']+summary+['<EOS>']
 
 			# get all oov words from this sample and append them to list

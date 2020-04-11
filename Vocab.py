@@ -1,6 +1,7 @@
 from collections import Counter
 import pickle
 import spacy
+from transformers import*
 
 
 class Vocab(object):
@@ -9,8 +10,8 @@ class Vocab(object):
 		self.i2w = {}
 		self.count = 0
 		self.max_size = max_size
-		self.nlp = spacy.load("en")
-		#nlp = en.load()
+		self.nlp = spacy.load('en_core_web_lg')
+		#self.nlp = OpenAIGPTTokenizer.from_pretrained('openai-gpt')
 		self.counter = Counter()
 
 	# def add_from_counter_list(self, counter_list):

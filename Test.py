@@ -1,6 +1,7 @@
+import pdb
 import torch
 from DataLoader import DataLoader
-import pdb
+
 import Hyperparameter as param
 from Batch import Batch
 from Util import numpy_to_var, toData, decoder_initial
@@ -32,8 +33,8 @@ for w in ['<PAD>', '<UNK>', '<SOS>', '<EOS>']:
 print("<unk>")
 print(vocab.w2i['<UNK>'])
 
-targetfile = "test_input.txt"
-inputfile = "test_target.txt"
+targetfile = "test_target.txt"
+inputfile = "test_input.txt"
 description = ""
 target = []
 nl = []
@@ -48,6 +49,7 @@ with open(targetfile, 'r', encoding="utf8") as f:
             description = ""
     target.append(description)
 
+description = ""
 with open(inputfile, 'r', encoding="utf8") as f:
     lines = f.readlines()
     for line in lines:
@@ -60,42 +62,43 @@ with open(inputfile, 'r', encoding="utf8") as f:
 test = []
 new_nl = []
 new_target = []
+# for i in range(min(len(nl), len(target))):
+#     string = nl[i].split()
+#     print("string")
+#     print(string)
+#     new_nl = [0] * len(string)
+#     for c in range(len(string)):
+#         try:
+#             if string[c] not in vocab.w2i:
+#                 new_nl[c] = "<UNK>"
+#
+#             else:
+#                 new_nl[c] = vocab.w2i[string[c]]
+#         except Exception as e:
+#             # pdb.set_trace()
+#             print(string[c])
+#             print(e)
+
+    # string = target[i].split()
+    # new_target = [0] * len(string)
+    # for c in range(len(string)):
+    #     try:
+    #         if string[c] not in vocab.w2i:
+    #             new_target[c] = "<UNK>"
+    #         else:
+    #             new_target[c] = vocab.w2i[string[c]]
+    #     except Exception as e:
+    #         # pdb.set_trace()
+    #         print(string[c])
+    #         print(e)
 for i in range(min(len(nl), len(target))):
-    string = nl[i].split()
-    print("string")
-    print(string)
-    new_nl = [0] * len(string)
-    for c in range(len(string)):
-        try:
-            if string[c] not in vocab.w2i:
-                new_nl[c] = "<UNK>"
-
-            else:
-                new_nl[c] = vocab.w2i[string[c]]
-        except Exception as e:
-            # pdb.set_trace()
-            print(string[c])
-            print(e)
-
-    string = target[i].split()
-    new_target = [0] * len(string)
-    for c in range(len(string)):
-        try:
-            if string[c] not in vocab.w2i:
-                new_target[c] = "<UNK>"
-            else:
-                new_target[c] = vocab.w2i[string[c]]
-        except Exception as e:
-            # pdb.set_trace()
-            print(string[c])
-            print(e)
-    testline = ",".join('%s' %id for id in new_nl) +  "\t" +  ",".join('%s' %id for id in new_target)
+    testline = "".join('%s' %id for id in nl[i]) +  "\t" +  "".join('%s' %id for id in target[i])
     test.append(testline)
 
 print("test")
 print(test)
 
-batch = Batch(file_list=[],max_in_len=30,max_out_len=30,max_oovs=12)
+batch = Batch(file_list=[],max_in_len=5000,max_out_len=5000,max_oovs=500)
 batch.num_of_minibatch=len(test)/param.batch_size
 
 # get number of batches
@@ -120,16 +123,13 @@ while(samples_read<len(test)):
 
     # 1.4.2. obtain batch outputs
     data = test[samples_read:min(samples_read+param.batch_size,len(test))]
-    try:
-        inputs, outputs = batch.process_minibatch(data, vocab)
-        #inputs, outputs, in_len, out_len = toData(data)
-        print("inpurs:")
-        print(inputs)
-        print("outputs:")
-        print(outputs)
-    except Exception as e:
-        print(e)
-        pdb.set_trace()
+    inputs, outputs = batch.process_minibatch(data, vocab)
+    #inputs, outputs, in_len, out_len = toData(data)
+    print("inpurs:")
+    print(inputs)
+    print("outputs:")
+    print(outputs)
+    len(data)
     samples_read+=len(data)
 
     # 1.4.3. inputs and outputs must be unk-ed to put into model w/ limited vocab
@@ -145,7 +145,7 @@ while(samples_read<len(test)):
 
     # 1.5. encoded outputs
     encoded, _ = encoder(x)
-
+    encoded.size()
     # 1.6.1. get initial input of decoder
     decoder_in, s, w = decoder_initial(x.size(0))
     decoder_in = y[:,0]
@@ -199,13 +199,9 @@ while(samples_read<len(test)):
         unk_decoder_in = Variable(torch.LongTensor(decoder_in))
     # 1.9.1. our targeted outputs should include OOV indices
     target_outputs = numpy_to_var(outputs[:, 1:])
-
+    target_outputs.size()
     # 1.9.2. get padded versions of target and output
-    try:
-        target = pack_padded_sequence(target_outputs, batch.output_lens.tolist(), batch_first=True)[0]
-    except Exception as e:
-        print(e)
-        pdb.set_trace()
+    target = pack_padded_sequence(target_outputs, batch.output_lens.tolist(), batch_first=True)[0]
     pad_out = pack_padded_sequence(out, batch.output_lens.tolist(), batch_first=True)[0]
     for idx in range(len(data)):
         input_print = []
