@@ -106,7 +106,7 @@ num_samples = len(test)
 num_batches = int(num_samples/param.batch_size)
 
 
-epoch = 10
+epoch = 40
 
 encoder = torch.load(f='model/encoder_%s_%s.pckl' % ("copynet",str(epoch)))
 decoder = torch.load(f='model/decoder_%s_%s.pckl' % ("copynet",str(epoch)))
