@@ -19,6 +19,11 @@ When <phrase>VDD</phrase> exceeds VUVH, the <phrase>band</phrase> gap is within 
 The device may be placed in <phrase>Standby mode</phrase> by applying a <phrase>high</phrase> level to the <phrase>STBY</phrase> pin. In <phrase>Standby mode</phrase>, the transmitter and the <phrase>high</phrase>-speed part of the receiver are switched off to minimize power consumption.
 <phrase>The MCP2542WFD/4WFD wakes up from <phrase>Standby/<phrase>Silent mode</phrase></phrase> </phrase>when a dedicated wake-up pattern (<phrase>WUP</phrase>) is detected on the <phrase>CAN</phrase> <phrase>bus</phrase>. The wake-up pattern is specified in <phrase><phrase>ISO</phrase></phrase> 11898-6 and <phrase><phrase>ISO</phrase></phrase>11898-2:2016
 
+Conditions for entering the Power On Reset:
+<phrase>• </phrase><phrase>VBAT</phrase> is below the <phrase>VBAT</phrase>_POD <phrase>AND</phrase> <phrase>VCC</phrase> is below <phrase>VCC</phrase>_UV threshold.
+Conditions for leaving the Power On Reset:
+<phrase>• </phrase>Once the power supply voltage <phrase>VBAT</phrase> <phrase>OR</phrase> <phrase>VCC</phrase> is within the functional <phrase>range</phrase> the transceiver enters Stand-by Mode within tPON.
+<phrase>The the internal Power On Reset flag </phrase>will be<phrase> set</phrase>. After <phrase>Power On Reset the TLE9252V enters Stand-by Mode</phrase>.
 
 
 The HI-3110 transmit buffer consists of an eight message <phrase>FIFO</phrase> which allows transmission of up to eight messages. Messages are loaded to the transmit <phrase>FIFO</phrase> via <phrase>SPI</phrase> instruction. The
@@ -29,12 +34,6 @@ The transmit <phrase>history</phrase> <phrase>FIFO</phrase> is updated (see belo
 b) The message is not successful due to <phrase>lost</phrase> <phrase>arbitration</phrase> or message error.
 <phrase>Lost</phrase> <phrase>Arbitration</phrase>:<phrase> If <phrase><phrase>arbitration</phrase> is <phrase>lost</phrase>, the current message stays in the Transmit Buffer for re-transmission</phrase></phrase>.
 Message error: Flag <phrase>BUSERR</phrase> is<phrase> set</phrase> in the Interrupt Flag Register. An error frame is sent and an optional hardware interrupt may also <phrase>be generated</phrase> at the <phrase>INT</phrase> pin if enabled in the Interrupt Enable Register (<phrase>bit</phrase> <phrase>BUSERR</phrase>IE = 1). If there is an error, the current message stays in the Transmit Buffer for automatic re-transmission in accordance with the <phrase>CAN</phrase> protocol.
-
-Conditions for entering the Power On Reset:
-<phrase>• </phrase><phrase>VBAT</phrase> is below the <phrase>VBAT</phrase>_POD <phrase>AND</phrase> <phrase>VCC</phrase> is below <phrase>VCC</phrase>_UV threshold.
-Conditions for leaving the Power On Reset:
-<phrase>• </phrase>Once the power supply voltage <phrase>VBAT</phrase> <phrase>OR</phrase> <phrase>VCC</phrase> is within the functional <phrase>range</phrase> the transceiver enters Stand-by Mode within tPON.
-<phrase>The the internal Power On Reset flag </phrase>will be<phrase> set</phrase>. After <phrase>Power On Reset the TLE9252V enters Stand-by Mode</phrase>.
 
 When <phrase>TXBNCTRL</phrase>.<phrase><phrase>TXREQ</phrase></phrase> is<phrase> set</phrase>, the <phrase>TXBNCTRL</phrase>.<phrase><phrase>ABTF</phrase></phrase>, <phrase>TXBNCTRL</phrase>.<phrase><phrase>MLOA</phrase></phrase> and <phrase>TXBNCTRL</phrase>.<phrase><phrase>TXERR</phrase></phrase> <phrase>bits</phrase> will be<phrase> cleared</phrase>.
 Setting the <phrase>TXBNCTRL</phrase>.<phrase><phrase>TXREQ</phrase></phrase> <phrase>bit</phrase> does not initiate amessage transmission, it merely <phrase>flags</phrase> a message buffer as ready for transmission.<phrase> Transmission will start </phrase>when <phrase>the device detects that the <phrase>bus</phrase> is available</phrase>. The device will then begin transmission of the highest priority message that is ready. When the <phrase>transmission has completed successfully</phrase> the
