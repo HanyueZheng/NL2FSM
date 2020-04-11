@@ -252,7 +252,7 @@ while(samples_read<len(test)):
         print(line1)
         print(line2)
         print(line4)
-        
+
         predictfile = open("predict.txt", "a+")
         print(line0 + "\n", file=predictfile)
         print(line1 + "\n", file=predictfile)
