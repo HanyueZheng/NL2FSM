@@ -18,8 +18,7 @@ criterion = nn.NLLLoss()
 start = time.time()
 targetfile = "target.txt"
 inputfile = "ie_out.txt"
-#device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-device = "cpu"
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 dataloader = DataLoader(inputfile, targetfile, device)
 x, y = dataloader.caseload()
 train = []
@@ -40,9 +39,9 @@ num_batches = int(num_samples/param.batch_size)
 
 encoder = CopyEncoder(vocab_size, param.embed_size, param.hidden_size)
 decoder = CopyDecoder(vocab_size, param.embed_size, param.hidden_size)
-# if torch.cuda.is_available():
-#     encoder.cuda()
-#     decoder.cuda()
+if torch.cuda.is_available():
+    encoder.cuda()
+    decoder.cuda()
 
 for epoch in range(param.num_epochs):
     print("==================================================")
@@ -58,10 +57,8 @@ for epoch in range(param.num_epochs):
 
         # obtain batch outputs
         batch = train[samples_read:min(samples_read+param.batch_size,len(train))]
-        #batch = train[samples_read]
         input_out, output_out, in_len, out_len = toData(batch)
         samples_read+=len(batch)
-        #samples_read += 1
 
         # mask input to remove padding
         input_mask = np.array(input_out>0, dtype=int)

@@ -106,7 +106,7 @@ num_samples = len(test)
 num_batches = int(num_samples/param.batch_size)
 
 
-epoch = 90
+epoch = 10
 
 encoder = torch.load(f='model/encoder_%s_%s.pckl' % ("copynet",str(epoch)))
 decoder = torch.load(f='model/decoder_%s_%s.pckl' % ("copynet",str(epoch)))
@@ -234,7 +234,7 @@ while(samples_read<len(test)):
         print("truth_print:")
         print(truth_print)
         try:
-            line1 = 'Input1:       ' + ''.join(vocab.idx_list_to_word_list(input_print, batch.idx2oov_list[idx]))
+            line1 = 'Input:       ' + ''.join(vocab.idx_list_to_word_list(input_print, batch.idx2oov_list[idx]))
 
         except Exception as e:
             print(e)
