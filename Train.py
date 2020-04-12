@@ -40,6 +40,7 @@ num_batches = int(num_samples/param.batch_size)
 encoder = CopyEncoder(vocab_size, param.embed_size, param.hidden_size)
 decoder = CopyDecoder(vocab_size, param.embed_size, param.hidden_size)
 if torch.cuda.is_available():
+    print("cuda")
     encoder.cuda()
     decoder.cuda()
 
