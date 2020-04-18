@@ -2,34 +2,13 @@ Based on the values of the error counters, the CAN controller is set into the st
 The MCP2515 contains two error counters: the Receive Error Counter (REC) (see Register 6-2) and the Transmit Error Counter (TEC) (see Register 6-1). The values of both counters can be read by the MCU. These counters are incremented/decremented in accordance with the CAN bus specification. The MCP2515 is error-active if both error counters are below the error-passive limit of 128. It is error-passive if at least one of the error counters equals or exceeds 128.
 It goes to bus-off if the TEC exceeds the bus-off limit of 255. The device remains in this state until the bus-off recovery sequence is received. The bus-off recovery sequence consists of 128 occurrences of 11 consecutive recessive bits (see Figure 6-1).
 The MCP2515, after going bus-off, will recover back to error-active without any intervention by the MCU if the bus remains idle for 128 x 11 bit times. If this is not desired, the error Interrupt Service Routine (ISR) should address this.
+
 If transmission is initiated via the SPI interface, the TXREQ bit can be set at the same time as the TXPx priority bits. When TXREQ is set, the ABTF, MLOA and TXERR bits (TXBnCTRL[5:4]) will be cleared automatically.Setting the TXREQ bit (TXBnCTRL[3]) does not initiate a message transmission. It merely flags a message buffer as being ready for transmission. Transmission will start when the device detects that the bus is available.
-Once the transmission has completed successfully, the TXREQ bit will be cleared, the TXnIF bit (CANINTF) will be set and an interrupt will be generated if the TXnIE bit (CANINTE) is set. 
+Once the transmission has completed successfully, the TXREQ bit will be cleared, the TXnIF bit (CANINTF) will be set and an interrupt will be generated if the TXnIE bit (CANINTE) is set.
 If the message transmission fails, the TXREQ bit will remain set. This indicates that the message is still pending for transmission and one of the following condition flags will be set:
 • If the message started to transmit but encountered an error condition, the TXERR (TXBnCTRL[4]) and MERRF bits (CANINTF[7]) will be set, and an interrupt will be generated on the INT pin if the MERRE bit (CANINTE[7]) is set.
 • If the message is lost, arbitration at the MLOA bit (TXBnCTRL[5]) will be set.
-The HI-3110 transmit buffer consists of an eight message FIFO which allows transmission of up to eight messages. Messages are loaded to the transmit FIFO via SPI instruction. The
-next message to be transmitted (or current message trying to gain access to the bus) is loaded from the FIFO to the Transmit Buffer. This will happen automatically if TXEN or TX1M are set in CTRL1. If the bus is available, the message is sent. The Transmit History FIFO can optionally be used by the host to keep a record of up to eight successfully transmitted messages. The current transmission sequence can also be paused by resetting the TXEN bit in CTRL1 (or pulling TXEN pin low). In this case, the current message will be completed and any remaining messages in the transmit FIFO will not be transmitted.
-If the current message transmission goes ahead, two things can happen:
-a) The message is successful, and the transmit buffer is now ready to receive the next message from the transmit FIFO.
-The transmit history FIFO is updated (see below).
-b) The message is not successful due to lost arbitration or message error.
-Lost Arbitration: If arbitration is lost, the current message stays in the Transmit Buffer for re-transmission.
-Message error: Flag BUSERR is set in the Interrupt Flag Register. An error frame is sent and an optional hardware interrupt may also be generated at the INT pin if enabled in the Interrupt Enable Register (bit BUSERRIE = 1). If there is an error, the current message stays in the Transmit Buffer for automatic re-transmission in accordance with the CAN protocol.
-Conditions for entering the Power On Reset:
-• VBAT is below the VBAT_POD AND VCC is below VCC_UV threshold.
-Conditions for leaving the Power On Reset:
-• Once the power supply voltage VBAT OR VCC is within the functional range the transceiver enters Stand-by Mode within tPON.
-The internal Power On Reset flag will be set. After Power On Reset the TLE9252V enters Stand-by Mode.
-When TXBNCTRL.TXREQ is set, the TXBNCTRL.ABTF, TXBNCTRL.MLOA and TXBNCTRL.TXERR bits will be cleared.
-Setting the TXBNCTRL.TXREQ bit does not initiate amessage transmission, it merely flags a message buffer as ready for transmission. Transmission will start when the device detects that the bus is available. The device will then begin transmission of the highest priority message that is ready. When the transmission has completed successfully the
-TXBNCTRL.TXREQ bit will be cleared, the CANINTF.TXNIF bit will be set, and an interrupt will be generated if the CANINTE.TXNIE bit is set. If the message transmission fails, the TXBNCTRL.TXREQ will remain set indicating that the message is still pending for transmission and one of the following condition flags will be set. If the message
-started to transmit but encountered an error condition, the TXBNCTRL. TXERR and the CANINTF.MERRF bits will be set and an interrupt will be generated on the INT pin if the CANINTE.MERRE bit is set. If the message lost arbitration the TXBNCTRL.MLOA bit will be
-set.
-The MCU can request to abort a message in a specific message buffer by clearing the associated TXBnCTRL. TXREQ bit. Also, all pending messages can be requested to be aborted by setting the CANCTRL. ABAT bit. If the CANCTRL.ABAT bit is set to abort all pending messages, the user MUST reset this bit (typically after the user verifies that all TXREQ bits have been cleared) to continue trasmit messages. The CANCTRL.ABTF flag will only be set if the abort was requested via the CANCTRL.ABAT bit. Aborting a message by resetting the TXREQ bit does cause the ATBF bit to be set.
-Of the three Receive Buffers, the MAB is always committed to receiving the next message from the bus. The remaining two receive buffers are called RXB0 and RXB1 and can receive a complete message from the protocol engine.
-The MAB assembles all messages received. These messages will be transferred to the RXBN buffers (See Register 4-4 to Register 4-9) only if the acceptance filter criteria are met. When a message is moved into either of the receive buffers the appropriate CANINTF.RXNIF bit is set. This bit must be cleared by the MCU, when it has completed processing the message in the buffer, in order to allow a new message to be received into the buffer. If the CANINTE.RXNIE bit is set an interrupt will be generate on the INT pin to indicate that a valid message has been received. When a message is received, bits <3:0> of the RXBNCTRL Register will indicate the acceptance filter number that enabled reception, and whether the received message is a remote transfer request.
-if a message has an error before the end of frame, that portion of the message assembled in the MAB before the error frame will be loaded into the buffer. This mode has some value in
-debugging a CAN system and would not be used in an actual system environment.
+
 The MCP2542FD/4FD and MCP2542WFD/4WFD enter Unpowered mode under the following conditions:
 •After powering up the device, or
 •If VDD drops below VPORL, or
@@ -39,16 +18,138 @@ In Wake mode, the CAN bus is biased to ground and RXD is always high.
 When VDD exceeds VUVH, the band gap is within valid range and TXD is High, the device transitions into Normal mode.
 The device may be placed in Standby mode by applying a high level to the STBY pin. In Standby mode, the transmitter and the high-speed part of the receiver are switched off to minimize power consumption.
 The MCP2542WFD/4WFD wakes up from Standby/Silent mode when a dedicated wake-up pattern (WUP) is detected on the CAN bus. The wake-up pattern is specified in ISO 11898-6 and ISO11898-2:2016
-The MCP2557FD/8FD enters Unpowered mode if any
-of the following conditions occur:
-• After powering up the device
-• If VDD drops below VPORL
-• If VIO drops below VPORL_VIO
-The MCP2557FD/8FD transitions from Unpowered mode to Wake mode when VDD and VIO are above their PORH levels. From Normal mode, if VDD is smaller than VUVL, or if the bandgap output voltage is not within valid range, the device will also enter Wake mode.
-When VDD exceeds VUVH, the band gap is within valid range and TXD is High, the device transitions into Normal mode. To avoid driving the bus during a POR of the microcontroller, the transceiver proceeds to Normal mode only after TXD is high.
-The device may be placed in Silent mode by applying a high level to the ‘S’ pin (pin 8). In Silent mode, the transmitter is disabled and the CAN bus is biased to VDD/2. The high-speed differential receiver is active. The CAN controller must put the MCP2557FD/8FD
-back into Normal mode to enable the transmitter.
-Failsafe is the method the device uses to enter sleep mode from various other modes when specific issues arise. This feature uses the Sleep Wake Error (SWE) timer to determine if the node processor can communicate to the TCAN4550-Q1.
-Upon power up the SWE timer starts, tINACTIVE, the processor has typically four minutes to configure the TCAN4550-Q1, clear the PWRON flag or configure the device for normal mode.
-If the device has not had the PWRON flag cleared or been placed into normal mode, it
-enters sleep mode. The device wakes up if the CAN bus provides a WUP or a local wake event takes place, thus entering standby mode. Once in standby mode tSILENCE and tINACTIVE timers starts. If tINACTIVE expires, the device re-enters sleep mode.
+
+Conditions for entering the Power On Reset:
+• VBAT is below the VBAT_POD AND VCC is below VCC_UV threshold.
+Conditions for leaving the Power On Reset:
+• Once the power supply voltage VBAT OR VCC is within the functional range the transceiver enters Stand-by Mode within tPON.
+The internal Power On Reset flag will be set. After Power On Reset the TLE9252V enters Stand-by Mode.
+
+The global configurations are automatically loaded when the CP2114 powers up. The audio boot configuration depends on the Config Select pin settings according to flow chart shown in the figure below. The audio configuration can be set by a one-time programmable ROM boot index or by reading the boot index from the Config Select pins. Setting the Config Select pins to 0x0F will load the default configuration. The one-time programmable ROM can be programmed in-system or Silicon Labs can provide custom preprogrammed parts with multiple customer-specified configurations.
+
+If the EEPROM operation is the “write location” (WRITE) or “write all” (WRAL) commands, the Host must first write the desired data into the E2P_DATA register. The Host must then issue the WRITE or WRAL command using the E2P_CMD register by setting the EPC_CMD field appropriately. If the operation is a WRITE, the EPC_ADDR field in E2P_CMD must also be set to the desired location. The command is executed when the Host sets the EPC_BSY bit high. The completion of the operation is indicated when the EPC_BSY bit is cleared.
+
+If the EEPROM operation is the “read location” (READ) operation, the Host must issue the READ command using the E2P_CMD register with the EPC_ADDR set to the desired location. The command is executed when the Host sets the EPC_BSY bit high. The completion of the operation is indicated when the EPC_BSY bit is cleared, at which time the data from the EEPROM may be read from the E2P_DATA register.
+
+The device may initially enter the UNPOWERED state when a POR occurs and USB power is not detected. This state persists until the VBUS_DET is asserted. The UNPOWERED state is alternatively entered whenever VBUS_DET deasserts.
+The NORMAL state is the fully functional state of the device. The are two flavors of the NORMAL state, NORMAL Configured and NORMAL Unconfigured. In the Configured variation, all chip subsystem modules are enabled. The Unconfigured variation has only a subset of the modules enabled. The reduced functionality allows for power savings.
+This NORMAL state is entered by any of the following methods:
+• A system reset and VBUS_DET is asserted.
+• The device is in the UNPOWERED state and VBUS_DET is asserted.
+• The device is suspended and the Host issues resume signaling.
+• The device is suspended and a wake event is detected
+Upon initially entering the NORMAL state, the device is unconfigured. The device transitions to the NORMAL Configured state upon the Host completion of the USB configuration. It is possible for the device to be deconfigured by the Host after being placed in the NORMAL configured state, via a set_configuration command. In this case, the CPM must place the device back into the NORMAL Unconfigured state.
+This state is entered from the NORMAL state when the device is suspended and the SUSPEND_MODE field in the Power Management Control Register (PMT_CTL) is set to 00b.In this state, the MAC can optionally be programmed to detect a Wake-On-Lan event or Magic Packet event. GPIO events can be programmed to cause wakeup in this state.
+This state is entered from the NORMAL state when the device is suspended and the SUSPEND_MODE field in the Power Management Control Register (PMT_CTL) is set to 01b. In this state, the Ethernet PHY can be optionally programmed for energy detect. GPIO events can also be programmed to cause wakeup in this state.
+This state is entered from the NORMAL state when the device is suspended and the SUSPEND_MODE field in the Power Management Control Register (PMT_CTL) is set to 10b. SUSPEND2 is the default suspend mode. This state consumes the least amount of power. In this state, the device may only be awakened by the Host or GPIO assertion.
+This state is entered from the NORMAL state when the device is suspended and the SUSPEND_MODE field in the Power Management Control Register (PMT_CTL) is set to 11b. In this suspend state, all clocks in the device are enabled and power consumption is similar to the NORMAL state. If GPIO7 is found to have caused the wakeup, the PHY Link Up Enable (PHY_LINKUP_EN) bit of the General Purpose IO Wake Enable and Polarity Register (GPIO_WAKE) may be examined to determined whether a PHY Link Up event or pin event occurred.
+
+a carrier indicator is set when the TX LPI request to the PHY is asserted. The wake timer (tw_timer) is triggered when the TX LPI request to the PHY is de-asserted and once the wake timer is satisfied, the carrier indicator is cleared. Note that there are separate TX wait values depending on the speed of operation.
+
+The UNPOWERED state provides a mechanism for the device to conserve power when VBUS_DET is not connected and the device is self powered.
+The device initially enters the UNPOWERED state when a system reset occurs and USB power is not detected. This state persists until the VBUS_DET is asserted. The UNPOWERED state is alternatively entered whenever VBUS_DET de-asserts.
+In the UNPOWERED state, the crystal oscillator and PLLs are turned off and the Ethernet PHY is disabled. Assertion of VBUS_DET causes the device to enable the crystal oscillator and PLLs. When PLLs are stable, the device transitions to the NORMAL-Unconfigured state.
+The NORMAL state is the functional state of the device. The are two versions of this state: NORMAL-Configured and NORMAL-Unconfigured. The NORMAL state is entered by any of the following methods:
+• A system reset and VBUS_DET is asserted
+• The device is in the UNPOWERED state and VBUS_DET is asserted
+• The device is in a SUSPENDx state and the host issues resume signaling.
+• The device is in a SUSPENDx state and a wake event is detected.
+Upon initially entering the NORMAL-Unconfigured state, the device is not configured. While unconfigured, the device will only draw up to 100 mA per the USB 2.0 Specification. After being configured, an additional 400 mA may be consumed when operating in USB 2.0 mode.
+In order to maximize power savings in NORMAL-Unconfigured mode, the Gigabit Ethernet PHY is held in reset.
+The device moves from the Normal-Unconfigured to Normal-Configured when directed by the host via the SetConfiguration request. Likewise, the host can move the device back into the Normal-Unconfigured state with this request.
+This is the fully operational state of the device where all clocking resources and analog blocks are enabled and functional.
+This state is selected when the Suspend Mode (SUSPEND_MODE) field of the Power Management Control Register (PMT_CTL) is set to 00b.
+In this state the device can optionally be programmed to detect GPIO wake, Wake-On-LAN event, Magic Packet, PHY Link Status, EEE wake, etc.. Refer to Section 13.4.2, "Enabling Wake Events," on page 131 for details on how to program events that cause resumption from the SUSPEND0 state. To maximize power savings the PLLs are shutdown. The 25 MHz crystal oscillator remains operational to clock the MAC and the Gigabit Ethernet PHY.
+The detection of a WOL event causes the PLL, as required for the established USB link, to be turned on and all output clocks to be enabled. This state is logically equivalent to SUSPEND0 and is selected when the Suspend Mode (SUSPEND_MODE) field of the Power Management Control Register (PMT_CTL) is set to 00b. This state is selected when the Suspend Mode (SUSPEND_MODE) field of the Power Management Control Register
+(PMT_CTL) is set to 10b. SUSPEND2 is the default suspend mode. SUSPEND2 consumes the least power of the suspend state options. It is the only option that meets the USB 2.5 mA
+suspend power consumption requirement. In this state, GPIO assertion is the only remote wakeup source supported. This state is selected when the Suspend Mode (SUSPEND_MODE) field of the Power Management Control Register (PMT_CTL) is set. Refer to Section 13.4.2.1, "Enabling GPIO Wake Events," on page 131, Section 13.4.2.4, "Enabling “GOOD Frame”
+Wake Events," on page 132, Section 13.4.2.2, "Enabling WOL Wake Events," on page 131, and Section 13.4.2.5,
+"Enabling “AOAC” Wake events" for detailed instructions on how to program events that cause resumption from the SUSPEND3 state. SUSPEND3 can also be exited when Energy Efficient Ethernet RX Wake (EEE_RX_WAKE) is set with Energy Efficient Ethernet RX Wake Enable (EEE_RX_WAKE_EN) set or when Energy Efficient Ethernet TX Wake (EEE_TX_WAKE) is set with Energy Efficient Ethernet TX Wake Enable (EEE_TX_WAKE_EN) set.
+
+The following power states are featured:
+• NORMAL (Unconfigured and Configured)
+• Suspend (SUSPEND0, SUSPEND1, SUSPEND2, and SUSPEND3)
+The are two flavors of the NORMAL state, NORMAL Configured and NORMAL Unconfigured.
+This NORMAL state is entered by any of the following methods:
+• A system reset is asserted.
+• The device is suspended and the host issues resume signaling.
+• The device is suspended and a wake event is detected.
+Upon initially entering the NORMAL state, the device is unconfigured. The device transitions to the NORMAL Configured state upon the host completion of the USB configuration.
+It is possible for the device to be deconfigured by the host after being placed in the NORMAL Configured state, via a set_configuration command. In this case, the CPM must place the device back into the NORMAL Unconfigured state.
+After a system reset, the device is placed into the NORMAL Unconfigured state. When in the NORMAL state, the READY bit in the Power Management Control Register (PMT_CTL) is set.
+When returning to the NORMAL state from the SUSPEND state, the USB context is maintained. After entering the NORMAL state, the READY bit in the PMT_CTL register is asserted. If the originating SUSPEND state is SUSPEND2, the host is required to reinitialize the Ethernet PHY registers.
+All suspend states must respond to a USB Reset and pin reset, nRESET. The application of these resets result in the device’s hardware being re-initialized and placed into the NORMAL Unconfigured state.
+This state is entered from the NORMAL state when the device is suspended and the SUSPEND_MODE field in the Power Management Control Register (PMT_CTL) is set to 00b.
+Refer to Section 4.12.2.1, "Enabling GPIO Wake Events", Section 4.12.2.2, "Enabling WOL Wake Events" and Section 4.12.2.4, "Enabling External PHY Link Up Wake Events" for detailed instructions on how to program events that cause resumption from the SUSPEND0 state. In this state, the MAC can optionally be programmed to detect a Wake On LAN event or Magic Packet event.
+GPIO events can be programmed to cause wakeup in this state. If GPIO7 signals the event, the PHY Link Up Enable (PHY_LINKUP_EN) bit of the General Purpose IO Wake Enable and Polarity Register (GPIO_WAKE) may be examined to determined whether a PHY Link Up event or Pin event occurred.
+This state is entered from the NORMAL state when the device is suspended and the SUSPEND_MODE field in the Power Management Control Register (PMT_CTL) is set to 01b.
+Refer to Section 4.12.2.1, "Enabling GPIO Wake Events", and Section 4.12.2.3, "Enabling Link Status Change (Energy Detect) Wake Events" for detailed instructions on how to program events that cause resumption from the SUSPEND1 state.
+In this state, the Ethernet PHY can be optionally programmed for energy detect. GPIO events can also be programmed to cause wakeup in this state.
+This state is entered from the NORMAL state when the device is suspended and the SUSPEND_MODE field in the Power Management Control Register (PMT_CTL) is set to 10b. SUSPEND2 is the default suspend mode.
+Refer to Section 4.12.2.1, "Enabling GPIO Wake Events" for detailed instructions on how to program events that cause resumption from the SUSPEND2 state.
+This state consumes the least amount of power. In this state, the device may only be awakened by the host or GPIO assertion.
+The state of the Ethernet PHY is lost when entering SUSPEND2. Therefore, host must reinitialize the PHY after the device returns to the NORMAL state.
+This state is entered from the NORMAL state when the device is suspended and the SUSPEND_MODE field in the Power Management Control Register (PMT_CTL) is set to 11b.
+Refer to Section 4.12.2.1, "Enabling GPIO Wake Events", Section 4.12.2.4, "Enabling External PHY Link Up Wake Events" and Section 4.12.2.5, "Enabling Good Frame Wake Events" for detailed instructions on how to program events that cause resumption from the SUSPEND3 state.
+This state supports wakeup from GPIO assertion, PHY Link Up, and on reception of a frame passing the filtering constraints set by the MAC Control Register (MAC_CR). Due to the limited amount of RX FIFO buffering, it is possible that there will be frames lost when in this state, as the USB resume time greatly exceeds the buffering capacity of the FIFO.
+
+Once the hardware is initialized, the firmware can begin to execute from the internal ROM. The firmware checks the CFG_SEL[1:0] configuration strap values to determine if it is configured for I2C Master loading. If so, the configuration is loaded from an external I2C ROM in the device’s CONFIG state.
+For all other configurations, the firmware checks for the presence of an external I2C/SMBus. It does this by asserting two pull down resistors on the data and clock lines of the bus. The pull downs are typically 50Kohm. If there are 10Kohm pull-ups present, the device becomes aware of the presence of an external SMBus/I2C bus. If a bus is detected, the firmware transitions to the SOC_CFG state.
+In SOC_CFG, the SOC may modify any of the default configuration settings specified in the integrated ROM such as USB device descriptors, or port electrical settings, and control features such as upstream battery charging detection. There is no time limit. In this stage the firmware will wait indefinitely for the SMBus/I2C configuration. When the SOC has completed configuring the device, it must write to register 0xFF to end the configuration.
+Once the SOC has indicated that it is done with configuration, then all the configuration data is combined. The default data, the SOC configuration data, the OTP data are all combined in the firmware and device is programmed. After the device is fully configured, it will go idle and then into suspend if there is no VBUS or Hub.Connect present. Once VBUS is present, and upstream battery charging is enabled, the device will transition to the Battery Charger Detection Stage (CHGDET). If VBUS is present, and upstream battery charging is not enabled, the device will transitions to the Connect (Hub.Connect) stage.
+
+Once the hardware is initialized, the firmware can begin to execute. The internal firmware checks for an external SPI ROM. The firmware looks for an external SPI flash device that contains a valid signature of “2DFU” (device firmware upgrade) beginning at address 0xFFFA. If a valid signature is found, then the external ROM is enabled and the code execution begins at address 0x0000 in the external SPI device. If a valid signature is not found, then execution continues from internal ROM. SPI ROMs used with the device must be 1 Mbit and support either 30 MHz or 60 MHz. If there are 10Kohm pull-ups present, the device becomes aware of the presence of an external SMBus/I2C bus. If a bus is detected, the firmware transitions to the SOC_CFG state.
+In this stage, the SOC may modify any of the default configuration settings specified in the integrated ROM such as USB device descriptors, or port electrical settings, and control features such as upstream battery charging detection.
+There is no time limit. In this stage the firmware will wait indefinitely for the SMBus/I2C configuration. When the SOC has completed configuring the device, it must write to register 0xFF to end the configuration.
+Once the SOC has indicated that it is done with configuration, then all the configuration data is combined. The default data, the SOC configuration data, the OTP data are all combined in the firmware and device is programmed.
+After the device is fully configured, it will go idle and then into suspend if there is no VBUS or Hub.Connect present. Once VBUS is present, and upstream battery charging is enabled, the device will transition to the Battery Charger Detection Stage (CHGDET). If VBUS is present, and upstream battery charging is not enabled, the device will transitions to the Connect (Hub.Connect) stage.
+After configuration, if enabled, the device enters the Battery Charger Detection Stage. If the battery charger detection feature was disabled during the CONFIG stage, the device will immediately transition to the Hub Connect (Hub.Connect) stage. If the battery charger detection feature remains enabled, the battery charger detection sequence is started
+automatically.
+If the charger detection remains enabled, the device will transition to the Hub.Connect stage if using the hardware detection mechanism.
+Once the CHGDET stage is completed, the device enters the Hub.Connect stage.
+
+The first stage, the initialization stage, occurs on the deassertion of RESET_N. If a valid signature is found, then the SPI Firmware/external SPI ROM is enabled and the code execution begins at address 0x0000 in the external SPI device. If a valid signature is not found, then execution continues from internal ROM (CFG_ROM stage). If the system is not strapped for SPI Mode, code execution will continue from internal ROM (CFG_ROM stage).
+5.1.3CONFIGURATION FROM INTERNAL ROM STAGE (CFG_ROM)
+In this stage, the internal firmware loads the default values from the internal ROM. Most of the hub configuration registers, USB descriptors, electrical settings, etc. will be initialized in this state even when running from SPI.
+If the CONFIG_STRAP_[2:1] pins are set to Configuration 5, the device will move to the SMBUS_CHECK stage, otherwise it move to the CFG_OTP stage.
+5.1.5SMBUS CHECK STAGE (SMBUS_CHECK)
+Based on the PROG_FUNC[8:1] configuration selected (refer to Section 3.3.4, "PROG_FUNC[8:1] Configuration (CONFIG_STRAP_[2:1])"), the firmware will check for the presence of external pull up resistors on the SMBus slave programmable function pins. If 10K pull-ups are detected on both pins, the device will be configured as an SMBus slave, and the next state will be CFG_SOC. If a pull-up is not detected in either of the pins, the next state is CFG_OTP.
+5.1.6SOC CONFIGURATION STAGE (CFG_SOC)
+In this stage, the SOC can modify any of the default configuration settings specified in the integrated ROM, such as USB device descriptors, port electrical settings, and control features such as downstream battery charging.
+In this stage the firmware will wait indefinitely for the SMBus/I2C configuration there is no time limit on this stage. The external SMBus master writes to register 0xFF, to end the configuration in legacy mode. In non-legacy mode, the SMBus command USB_ATTACH (opcode 0xAA55) or USB_ATTACH_WITH_SMBUS (opcode 0xAA56) will finish the configuration.
+5.1.7OTP CONFIGURATION STAGE (CFG_OTP)
+Once the SOC has indicated that it is done with configuration, all configuration data is combined in this stage. The default data, the SOC configuration data, and the OTP data are all combined in the firmware and the device is programmed.
+5.1.8HUB CONNECT STAGE (USB_ATTACH)
+Once the hub registers are updated through default values, SMBus master, and OTP, the device firmware will enable attaching the USB host by setting the USB_ATTACH bit in the HUB_CMD_STAT register. The device will remain in the Hub Connect stage indefinitely until the VBUS function is deasserted/assertion of external RESET_N pin.
+5.1.9NORMAL MODE (NORMAL_MODE)
+Lastly, the hub enters Normal Mode of operation.
+
+SPI INITIALIZATION STAGE (SPI_INIT)
+The first stage, the initialization stage, occurs on the deassertion of RESET_N. The internal
+firmware then checks for an external SPI ROM. If a valid signature is found, then the external ROM is enabled and the code execution begins at address 0x0000 in the external SPI device. If a valid signature is not found, then execution continues from internal ROM (CFG_RD stage).
+CONFIGURATION READ STAGE (CFG_RD)
+In this stage, the internal firmware loads the default values from the internal ROM and then uses the configuration strapping options to override the default values. Refer to Section 3.4, "Configuration Straps and Programmable Functions" for information on usage of the various device configuration straps.
+STRAP READ STAGE (STRAP)
+In this stage, the firmware registers the configuration strap settings on the SPI_DO and SPI_CLK pins. Refer to Section 3.4.1, "SPI/SMBus Configuration" for information on configuring these straps. If configured for SMBus Slave Mode, the next state will be SOC_CFG. Otherwise, the next state is OTP_CFG.
+SOC CONFIGURATION STAGE (SOC_CFG)
+In this stage, the SOC can modify any of the default configuration settings specified in the integrated ROM, such as USB device descriptors and port electrical settings.
+There is no time limit on this mode. In this stage the firmware will wait indefinitely for the SMBus/I2C configuration. When the SOC has completed configuring the device, it must write to register 0xFF to end the configuration.
+OTP CONFIGURATION STAGE (OTP_CFG)
+Once the SOC has indicated that it is done with configuration, all configuration data is combined in this stage. The default data, the SOC configuration data, and the OTP data are all combined in the firmware and the device is programmed. After the device is fully configured, it will go idle and then into suspend if there is no VBUS or Hub.Connect present.
+Once VBUS is present, and battery charging is enabled, the device will transition to the Battery Charger Detection Stage. If VBUS is present, and battery charging is not enabled, the device will transition to the Connect stage.
+HUB CONNECT STAGE (HUB.CONNECT)
+Once the CHGDET stage is completed, the device enters the Hub Connect stage.
+
+SPI Initialization Stage (SPI_INIT)
+The first stage, the initialization stage, occurs on the deassertion of RESET_N. If a valid signature is found, then the external ROM is enabled and the code execution begins at address 0x0000 in the external SPI device. If a valid signature is not found, then execution continues from internal ROM (CFG_RD stage).
+Configuration Read Stage (CFG_RD)
+In this stage, the internal firmware loads the default values from the internal ROM and then uses the configuration strapping options to override the default values. Refer to Section 3.5, Configuration Straps and Programmable Functions for information on usage of the various device configuration straps.
+Strap Read Stage (STRAP)
+In this stage, the firmware registers the configuration strap settings and checks the state of CFG_STRAP. If CFG_STRAP is set for CONFIG2, then the hub will check the state of the SMBDATA and SMBCLK pins. If 10k pull-up resistors are detected on both pins, the device will enter the SOC_CFG stage. If 10k pull-up resistors are not detected on both pins, the hub will transition to the OTP_CFG stage instead.
+SOC Configuration Stage (SOC_CFG)
+In this stage, the SOC can modify any of the default configuration settings specified in the integrated ROM, such as USB device descriptors and port electrical settings. There is no time limit on this mode. In this stage the firmware will wait indefinitely for the SMBus/I2C configuration. When the SOC has completed configuring the device, it must write to register 0xFF to end the configuration.
+OTP Configuration Stage (OTP_CFG)
+Once the SOC has indicated that it is done with configuration, all configuration data is combined in this stage. The default data, the SOC configuration data, and the OTP data are all combined in the firmware and the device is programmed. After the device is fully configured, it will go idle and then into suspend if there is no VBUS or Hub.Connect present.
+Once VBUS is present, and battery charging is enabled, the device will transition to the Battery Charger Detection Stage. If VBUS is present, and battery charging is not enabled, the device will transition to the Connect stage.
+Hub Connect Stage (Hub.Connect)
+Once the CHGDET stage is completed, the device enters the Hub Connect stage. USB connect can be initiated by asserting the VBUS pin function high. The device will remain in the Hub Connect stage indefinitely until the VBUS pin function is deasserted. Lastly, the hub enters Normal Mode of operation.

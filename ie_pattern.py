@@ -1,14 +1,14 @@
 import re
 
 filename = "segmentation.txt"
-with open(filename, 'r') as f:
+with open(filename, 'r' , encoding="utf-8") as f:
     lines = f.read()
     lines = lines.replace("</phrase> <phrase>", " ")
-    file = open("seg.txt", "w+")
-    print(lines, file=file)
-    file.close()
+    # file = open("seg.txt", "w+")
+    # print(lines, file=file)
+    # file.close()
     iefile = open("ie_out.txt", "w+")
-    file1 = open("input.txt", "r+")
+    file1 = open("input.txt", "r+" , encoding="utf-8")
     outlines = file1.read()
     print("outlines:" + outlines)
     linesplit = outlines.split(".")

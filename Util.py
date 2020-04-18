@@ -7,8 +7,8 @@ def numpy_to_var(x,is_int=True):
         x = torch.LongTensor(x)
     else:
         x = torch.Tensor(x)
-    if torch.cuda.is_available():
-        x = x.cuda()
+    # if torch.cuda.is_available():
+    #     x = x.cuda()
     return Variable(x)
 
 def toData(batch):
@@ -43,7 +43,7 @@ def decoder_initial(batch_size):
     decoder_in = torch.LongTensor(np.ones(batch_size,dtype=int))*2
     s = None
     w = None
-    if torch.cuda.is_available():
-        decoder_in = decoder_in.cuda()
+    # if torch.cuda.is_available():
+    #     decoder_in = decoder_in.cuda()
     decoder_in = Variable(decoder_in)
     return decoder_in, s, w
