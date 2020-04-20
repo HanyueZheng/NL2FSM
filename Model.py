@@ -49,6 +49,8 @@ class CopyDecoder(nn.Module):
 		# weighted: [b x 1 x hidden*2]		<- weighted attention of previous state, init with all zeros (Variable)
 
 		# hyperparameters
+		encoded.size()
+		input_idx.size()
 		start = time.time()
 		b = encoded.size(0) # batch size
 		encoded.size()
